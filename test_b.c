@@ -6,7 +6,7 @@
 /*   By: pgritsen <pgritsen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/11/01 16:08:49 by pgritsen          #+#    #+#             */
-/*   Updated: 2017/11/04 18:28:35 by pgritsen         ###   ########.fr       */
+/*   Updated: 2017/11/04 20:32:38 by pgritsen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,38 @@ static void	del(void *data, size_t size)
 	size = 0;
 }
 
+static void	ft_lstdel_my(t_list **alst, void (*del)(void *, size_t))
+{
+	t_list	*lst;
+	t_list	*buff;
+
+	if (!alst || !del)
+		return ;
+	lst = *alst;
+	while (lst)
+	{
+		del(lst->content, lst->content_size);
+		buff = lst->next;
+		ft_memdel((void **)&lst);
+		lst = buff;
+	}
+	*alst = NULL;
+}
+
+static char	*ft_strnew_my(size_t size)
+{
+	char		*tmp;
+	size_t		it;
+
+	tmp = (char *)malloc((size + 1) * sizeof(char));
+	if (tmp == NULL)
+		return (NULL);
+	it = 0;
+	while (it <= size)
+		tmp[it++] = 0;
+	return (tmp);
+}
+
 static t_list *listr(t_list *elem)
 {
 	t_list *tmp;
@@ -31,6 +63,12 @@ static t_list *listr(t_list *elem)
 	tmp->content_size = elem->content_size;
 	tmp->next = elem->next;
 	return (tmp);
+}
+
+static t_list *listr_c(t_list *elem)
+{
+	strcat(elem->content, "\t");
+	return (elem);
 }
 
 static void	print(t_list *lst)
@@ -128,19 +166,19 @@ static void	test_ft_lstiter()
 	t_list *tmp;
 
 	tmp = (t_list *)malloc(sizeof(t_list));
-	tmp->content = strdup("\tTest");
+	tmp->content = strdup("\t|Test");
 	tmp->content_size = 6;
 	tmp->next = (t_list *)malloc(sizeof(t_list));
 	tmp->next->content = strdup("\t--\t");
 	tmp->next->content_size = 5;
 	tmp->next->next = (t_list *)malloc(sizeof(t_list));
-	tmp->next->next->content = strdup("[OK]\n");
+	tmp->next->next->content = strdup("[OK]|\n");
 	tmp->next->next->content_size = 6;
 	tmp->next->next->next = NULL;
 
 	ft_lstiter(tmp, &print);
 
-	printf("\t(If above no text \"Test    --      [OK]\", test failed)\n");
+	printf("\t(If above no text \"|Test    --      [OK]|\", test failed)\n");
 }
 
 static void	test_ft_lstmap()
@@ -148,8 +186,8 @@ static void	test_ft_lstmap()
 	t_list *tmp, *tmp2;
 
 	tmp = (t_list *)malloc(sizeof(t_list));
-	tmp->content = strdup("\tTest");
-	tmp->content_size = 7;
+	tmp->content = strdup("Test");
+	tmp->content_size = 6;
 	tmp->next = (t_list *)malloc(sizeof(t_list));
 	tmp->next->content = strdup("--");
 	tmp->next->content_size = 4;
@@ -160,9 +198,30 @@ static void	test_ft_lstmap()
 
 	tmp2 = ft_lstmap(tmp, &listr);
 
-	printf("%s%s%s\n", tmp2->content, tmp2->next->content, tmp2->next->next->content);
+	printf("\t|%s%s%s|\n", tmp2->content, tmp2->next->content, tmp2->next->next->content);
+	printf("\t(If above no text \"|Test    --      [OK]    |\", test failed)\n");
 
-	printf("\t(If above no text \"Test    --      [OK]\", test failed)\n");
+	ft_lstdel_my(&tmp, &del);
+	ft_lstdel_my(&tmp2, &del);
+
+	tmp = (t_list *)malloc(sizeof(t_list));
+	tmp->content = ft_strnew_my(7);
+	strcpy(tmp->content, "Test");
+	tmp->content_size = 6;
+	tmp->next = (t_list *)malloc(sizeof(t_list));
+	tmp->next->content = ft_strnew_my(4);
+	strcpy(tmp->next->content, "--");
+	tmp->next->content_size = 4;
+	tmp->next->next = (t_list *)malloc(sizeof(t_list));
+	tmp->next->next->content = ft_strnew_my(6);
+	strcpy(tmp->next->next->content, "[OK]");
+	tmp->next->next->content_size = 6;
+	tmp->next->next->next = NULL;
+
+	tmp2 = ft_lstmap(tmp, &listr_c);
+
+	printf("\t|%s%s%s|\n", tmp2->content, tmp2->next->content, tmp2->next->next->content);
+	printf("\t(If above no text \"|Test    --      [OK]    |\", test failed)\n");
 }
 
 int		main()

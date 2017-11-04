@@ -83,6 +83,7 @@ elif [[ -z $1  ]] || [[ $1 = "debug" ]]; then
 		if [[ -z "$(find ../ -name "Makefile")" ]]; then
 			echo "!NO Makefile file found!\n";
 		else
+			CURRDIR=$(pwd)
 			cd ../;
 			MAKEFILE=$(make > /dev/null && make);
 			make clean > /dev/null;
@@ -94,7 +95,7 @@ elif [[ -z $1  ]] || [[ $1 = "debug" ]]; then
 				echo "!TEST!\t--\tMAKEFILE\t--\t[OK]\n";
 			fi
 			make fclean > /dev/null;
-			cd TEST;
+			cd $CURRDIR;
 		fi
 	fi
 
