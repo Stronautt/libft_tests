@@ -6,7 +6,7 @@
 /*   By: pgritsen <pgritsen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/25 18:07:22 by pgritsen          #+#    #+#             */
-/*   Updated: 2017/11/04 15:55:50 by pgritsen         ###   ########.fr       */
+/*   Updated: 2017/11/05 13:49:11 by pgritsen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,14 +15,28 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+/*
+**		Color Library
+*/
+
+char	NC[] = "\033[0m",
+		GREEN[] = "\033[32m",
+		RED[] = "\033[31m",
+		YELLOW[] = "\033[33m",
+		LCYAN[] = "\033[96m";
+
 static void	test_ft_putstr(void)
 {
-	ft_putstr("!TEST!\t--\tft_putstr\t--\t[OK]\n\n");
+	printf("%s!TEST!\t--\tft_putstr%s\n", LCYAN, GREEN);
+	ft_putstr("\t[OK]");
+	printf("%s\n", NC);
 }
 
 static void	test_ft_putendl(void)
 {
-	ft_putendl("!TEST!\t--\tft_putendl\t--\t[OK]");
+	printf("%s!TEST!\t--\tft_putendl%s\n", LCYAN, GREEN);
+	ft_putendl("\t[OK]");
+	printf("%s\n", NC);
 }
 
 static void test_ft_memset(void *(*func)(void *, int, size_t))
@@ -39,30 +53,30 @@ static void test_ft_memset(void *(*func)(void *, int, size_t))
 	memset(s1, '\0', 4);
 	func(ft_s1, '\0', 4);
 	if (!memcmp(s1, ft_s1, sizeof(s1)))
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 
 	memset(s2, '\200', 0);
 	func(ft_s2, '\200', 0);
 	if (!memcmp(s2, ft_s2, sizeof(s2)))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 
 	memset(s3, 'O', sizeof(s3));
 	func(ft_s3, 'O', sizeof(ft_s3));
 	if (!memcmp(s3, ft_s3, sizeof(s3)))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 
 	memset(s4, '-', 1);
 	func(ft_s4, '-', 1);
 	if (!memcmp(s4, ft_s4, sizeof(s4)))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	printf("\n");
 }
 
@@ -80,30 +94,30 @@ static void test_ft_bzero(void *(*func)(void *, size_t))
 	bzero(s1, 4);
 	func(ft_s1, 4);
 	if (!memcmp(s1, ft_s1, sizeof(s1)))
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 
 	bzero(s2, 0);
 	func(ft_s2, 0);
 	if (!memcmp(s2, ft_s2, sizeof(s2)))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 
 	bzero(s3, sizeof(s3));
 	func(ft_s3, sizeof(ft_s3));
 	if (!memcmp(s3, ft_s3, sizeof(s3)))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 
 	bzero(s4, 1);
 	func(ft_s4, 1);
 	if (!memcmp(s4, ft_s4, sizeof(s4)))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	printf("\n");
 }
 
@@ -123,9 +137,9 @@ static void	test_ft_memcpy(void *(*func)(void *, const void *, size_t))
 	person.age = 42;
 
 	if (!strcmp(ft_person.name, person.name))
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 
 	func(&ft_person, &ft_person_copy, sizeof(ft_person));
 
@@ -133,9 +147,9 @@ static void	test_ft_memcpy(void *(*func)(void *, const void *, size_t))
 
 	if (!strcmp(ft_person_copy.name, person_copy.name)
 		&& ft_person_copy.age == person_copy.age)
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	printf("\n");
 }
 
@@ -160,30 +174,30 @@ static void test_ft_memccpy(void *(*func)(void *, const void *, int, size_t))
 	p2 = ft_memccpy(buf2, buf1, 'i', 10);
 
 	if (p1 == p2)
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 
 	if (r1 == r2)
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 
 	func(ft_destination, src, '\0', strlen(src) + 1);
 	memccpy(destination, src, '\0', strlen(src) + 1);
 
 	if (!strcmp(destination, ft_destination))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 
 	func(ft_destination, src, 'R', strlen(src) + 1);
 	memccpy(destination, src, 'R', strlen(src) + 1);
 
 	if (!strcmp(destination, ft_destination))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	printf("\n");
 }
 
@@ -196,39 +210,39 @@ static void test_ft_memmove(void *(*func)(void *, const void *, size_t))
 	func(ft_a, "Hello", 5);
 	memmove(a, "Hello", 5);
 	if (!strncmp(a, ft_a, sizeof(a)))
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 
 	func(ft_a, "H\0llo", 5);
 	memmove(a, "H\0llo", 5);
 	if (!strncmp(a, ft_a, sizeof(a)))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 
 	func(ft_a, b, strlen(b) + 1);
 	memmove(a, b, strlen(b) + 1);
 	if (!strncmp(a, ft_a, sizeof(a)))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 
 	func(ft_a + 15, ft_a + 4, 11);
 	memmove(a + 15, a + 4, 11);
 	if (!strncmp(a, ft_a, sizeof(a)))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 
 	int		dst, ft_dst, src = 2147483647;
 
 	func(&dst, &src, 4);
 	memmove(&ft_dst, &src, 4);
 	if (dst == ft_dst)
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	printf("\n");
 }
 
@@ -248,37 +262,37 @@ static void	test_ft_memchr(void *(*func)(const void *, int, size_t))
 	p = (char *)memchr(s1, 'p', strlen(s1));
 	ft_p = (char *)func(s1, 'p', strlen(s1));
 	if (ft_p != NULL && p - s1 == ft_p - s1)
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 	if (func(s2, 'x', 0) == NULL)
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func(s3, 'y', 0) == NULL)
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if ((char *)func(s3, 'a', 1) - s3 == 0)
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func(s3, 'd', 2)  == NULL)
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if ((char *)func(s3, 'd', 12)  - s3 == 3)
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if ((char *)func(s3, 'f', 12)  - s3 == 5)
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if ((char *)func(s4, '1', 20)  - s4 == 0)
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	printf("\n");
 }
 
@@ -293,38 +307,38 @@ static void	test_ft_memcmp(int (*func)(const void *, const void *, size_t))
 	n2 = func(buffer1, buffer2, sizeof(buffer1));
 
 	if (n1 == n2)
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 
 	n1 = memcmp(buffer1, buffer2, 9);
 	n2 = func(buffer1, buffer2, 9);
 
 	if (n1 == n2 && n2 == 0)
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	printf("\n");
 }
 
 static void	test_ft_strlen(size_t (*func)(const char *))
 {
 	if (func("Hello World!") == strlen("Hello World!"))
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 	if (func("") == strlen(""))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func("H") == strlen("H"))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func("Hel\0lo World!") == strlen("Hel\0lo World!"))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	printf("\n");
 }
 
@@ -339,17 +353,17 @@ static void	test_ft_strdup(char	*(*func)(const char *))
 	ft_d_s = func(s);
 
 	if (!strcmp(d_s, ft_d_s))
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 
 	d_s = strdup(empt);
 	ft_d_s = func(empt);
 
 	if (!strcmp(d_s, ft_d_s))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 
 	free(d_s);
 	free(ft_d_s);
@@ -366,17 +380,17 @@ static void	test_ft_strcpy(char	*(*func)(char *, const char *))
 	func(ft_o, s);
 
 	if (!strcmp(ft_o, o))
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 
 	strcpy(o, "");
 	func(ft_o, "");
 
 	if (!strcmp(ft_o, o))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	printf("\n");
 }
 
@@ -390,17 +404,17 @@ static void	test_ft_strncpy(char *(*func)(char *, const char *, size_t))
 	func(ft_o, s, sizeof(ft_o));
 
 	if (!strncmp(ft_o, o, sizeof(o)))
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 
 	strncpy(o, "", 1);
 	func(ft_o, "", 1);
 
 	if (!strncmp(ft_o, o, sizeof(o)))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 
 	char	s15[] = "Source";
 	char	d16[] = "Destin";
@@ -410,9 +424,9 @@ static void	test_ft_strncpy(char *(*func)(char *, const char *, size_t))
 	ft_p = func(d16, s15, 5);
 
 	if (!strncmp(ft_p, p, sizeof(d16)))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	printf("\n");
 }
 
@@ -430,9 +444,9 @@ static void	test_ft_strcat(char	*(*func)(char *, const char *))
 	
 
 	if (!strncmp(s, ft_s, sizeof(s)))
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 	printf("\n");
 }
 
@@ -452,14 +466,14 @@ static void	test_ft_strncat(char *(*func)(char *, const char *, size_t))
 	ft_p = func(ft_o, s, 6);
 
 	if (!strncmp(o, ft_o, sizeof(o)))
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 
 	if (!strcmp(p, ft_p))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 
 	strcpy(ft_o, "To be ");
 	strcpy(o, "To be ");
@@ -468,9 +482,9 @@ static void	test_ft_strncat(char *(*func)(char *, const char *, size_t))
 	ft_p = func(ft_o, s, 12);
 
 	if (!strncmp(o, ft_o, sizeof(o)) && !strcmp(p, ft_p))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	printf("\n");
 }
 
@@ -488,44 +502,44 @@ static void	test_ft_strlcat(size_t (*func)(char *, const char *, size_t))
 	p_b = strdup(" World");
 	if (func(ft_p_a, p_b, strlen(p_b) + 1) == strlcat(p_a, p_b, strlen(p_b) + 1)
 		&& !strcmp(ft_p_a, p_a))
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 	if (func(ft_p_a, p_b, sizeof(ft_p_a)) == strlcat(p_a, p_b, sizeof(p_a))
 		&& !strcmp(ft_p_a, p_a))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func(ft_p_a, p_b, 1) == strlcat(p_a, p_b, 1)
 		&& !strcmp(ft_p_a, p_a))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func(ft_p_a, p_b, -1) == strlcat(p_a, p_b, -1)
 		&& !strcmp(ft_p_a, p_a))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func(ft_a, b, 0) == strlcat(a, b, 0)
 		&& !strcmp(ft_a, a))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func(ft_a, b, strlen(b) + strlen(ft_a) + 1) == strlcat(a, b, strlen(b) + strlen(a) + 1)
 		&& !strcmp(ft_a, a))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func(ft_a, b, strlen(b) + strlen(ft_a) - 1) == strlcat(a, b, strlen(b) + strlen(a) - 1)
 		&& !strcmp(ft_a, a))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func(ft_a, b, strlen(b) + 1) == strlcat(a, b, strlen(b) + 1)
 		&& !strcmp(ft_a, a))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	printf("\n");
 }
 
@@ -535,25 +549,25 @@ static void	test_ft_strchr(char	*(*func)(const char *, int))
 	char	a[128] = "Hello World!";
 
 	if (!strncmp(func(ft_a, 'o'), strchr(a, 'o'), sizeof(a)))
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 	if (func(ft_a, '3') == strchr(a, '3'))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (!strncmp(func(ft_a, '!'), strchr(a, '!'), sizeof(a)))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (!strncmp(func(ft_a, 0), strchr(a, 0), sizeof(a)))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (!strncmp(ft_a, a, sizeof(a)))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	printf("\n");
 }
 
@@ -563,25 +577,25 @@ static void	test_ft_strrchr(char *(*func)(const char *, int))
 	char	a[128] = "Hello World!";
 
 	if (!strncmp(func(ft_a, 'o'), strrchr(a, 'o'), sizeof(a)))
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 	if (func(ft_a, '3') == strrchr(a, '3'))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (!strncmp(func(ft_a, '!'), strrchr(a, '!'), sizeof(a)))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (!strncmp(func(ft_a, 0), strrchr(a, 0), sizeof(a)))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (!strncmp(ft_a, a, sizeof(a)))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	printf("\n");
 }
 
@@ -590,22 +604,22 @@ static void	test_ft_strstr(char *(*func)(const char *, const char *))
 	const char *largestring = "Foo Bar Baz";
 
 	if (!strcmp(func(largestring, "Bar"), strstr(largestring, "Bar")))
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 	if (!strcmp(strstr(largestring, ""), func(largestring, "")))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func(largestring, "QW") == NULL
 		&& strstr(largestring, "QW") == NULL)
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (!strcmp(func(largestring, "Ba"), strstr(largestring, "Ba")))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	printf("\n");
 }
 
@@ -615,14 +629,14 @@ static void	test_ft_strnstr(char *(*func)(const char *, const char *, size_t))
 
 	if (!strcmp(func(largestring, "MZIRIBMZE", -1), strnstr(largestring, "MZIRIBMZE", -1))
 		&& func(largestring, "MZIRIBMZE", 7) == strnstr(largestring, "MZIRIBMZE", 7))
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else	
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 	for (int i = 1; i < 10; i++)
 		if (func(largestring, "MZIRIBMZE", i) == strnstr(largestring, "MZIRIBMZE", i))
-			printf(" [OK] ");
+			printf("%s%s%s", GREEN, " [OK] ", NC);
 		else
-			printf(" [FAILED] ");
+			printf("%s%s%s", RED, " [FAILED] ", NC);
 
 	char	buf[10];
 
@@ -631,9 +645,9 @@ static void	test_ft_strnstr(char *(*func)(const char *, const char *, size_t))
 	buf[9] = '6';
 	buf[1] = 0;
 	if(func(buf, "deux", 10) == strnstr(buf, "deux", 10))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	printf("\n");
 }
 
@@ -648,29 +662,29 @@ static void	test_ft_strcmp(int (*func)(const char *, const char *))
 	char	g[] = "Hello Wolr\200";
 
 	if (func(a, b) == strcmp(a, b))
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 	if (func(a, c) == strcmp(a, c))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func(a, d) == strcmp(a, d))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func(a, e) == strcmp(a, e))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func(a, f) == strcmp(a, f))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func(a, g) == strcmp(a, g))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	printf("\n");
 }
 
@@ -685,142 +699,142 @@ static void	test_ft_strncmp(int (*func)(const char *, const char *, size_t))
 	char	g[] = "Hello Wolr\200";
 
 	if (func(a, b, sizeof(a)) == strncmp(a, b, sizeof(a)))
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 	if (func(a, c, 0) == strncmp(a, c, 0))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func(a, d, sizeof(a)) == strncmp(a, d, sizeof(a)))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func(a, e, sizeof(e)) == strncmp(a, e, sizeof(e)))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func(a, f, sizeof(f)) == strncmp(a, f, sizeof(f)))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func(a, g, sizeof(a)) == strncmp(a, g, sizeof(a)))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func(a, c, -1) == strncmp(a, c, -1))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func(a, c, 123456) == strncmp(a, c, 123456))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func(a, d, 5) == strncmp(a, d, 5))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	printf("\n");
 }
 
 static void	test_ft_atoi(int (*func)(const char *))
 {
 	if (func("   1425") == atoi("   1425"))
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 	if (func("12s1425") == atoi("12s1425"))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func("s1425") == atoi("s1425"))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func("     \t1425sad213") == atoi("     \t1425sad213"))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func("2147483647") == atoi("2147483647"))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func("-2147483648") == atoi("-2147483648"))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func("+2147483648") == atoi("+2147483648"))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func("9223372036854775807") == atoi("9223372036854775807"))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func("9223372036854775808") == atoi("9223372036854775808"))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func("922337203685477580712125325543357343463643464634633466344366323523959359238")
 		== atoi("922337203685477580712125325543357343463643464634633466344366323523959359238"))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func("-922337203685477580712125325543357343463643464634633466344366323523959359238")
 		== atoi("-922337203685477580712125325543357343463643464634633466344366323523959359238"))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	printf("\n");
 }
 
 static void	test_ft_isalpha(int (*func)(char))
 {
 	if (func('\108') == isalpha('\108'))
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 	if (func('\148') == isalpha('\148'))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func(12) == isalpha(12))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func('\200') == isalpha('\200'))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func(0) == isalpha(0))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func('\101') == isalpha('\101'))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	printf("\n");
 }
 
 static void	test_ft_isdigit(int (*func)(char))
 {
 	if (func('1') == isdigit('1'))
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 	if (func('4') == isdigit('4'))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func('\200') == isdigit('\200'))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (func('A') == isdigit('A'))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	printf("\n");
 }
 
@@ -831,9 +845,9 @@ static void	test_ft_strnew()
 
 	ft_a = ft_strnew(5);
 	if (!strncmp(a, ft_a, sizeof(a)))
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 	printf("\n");
 }
 
@@ -847,15 +861,15 @@ static void	test_ft_strjoin()
 	p_s = ft_strjoin(s1, s2);
 
 	if (p_s && !strcmp(s1, "where is my ") && !strcmp(p_s, s3))
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 	ft_strjoin(NULL, s2);
-	printf(" [OK] ");
+	printf("%s%s%s", GREEN, " [OK] ", NC);
 	ft_strjoin(s1, NULL);
-	printf(" [OK] ");
+	printf("%s%s%s", GREEN, " [OK] ", NC);
 	ft_strjoin(NULL, NULL);
-	printf(" [OK] ");
+	printf("%s%s%s", GREEN, " [OK] ", NC);
 	printf("\n");
 }
 
@@ -869,9 +883,9 @@ static void	test_ft_strtrim()
 
 	s3 = ft_strtrim(s1);
 	if (!memcmp(s2, s3, r_size + 1))
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 	printf("\n");
 }
 
@@ -884,42 +898,42 @@ static void	test_ft_strsplit()
 	for (int i = 0; i < 2; i++)
 		if (strcmp(ft_test[i], test[i]))
 		{
-			printf(" [FAILED] ");
+			printf("%s%s%s", RED, " [FAILED] ", NC);
 			return ;
 		}
 	if ((int)ft_test[2] == 0)
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 	printf("\n");
 }
 
 static void	test_ft_itoa()
 {
 	if (!strcmp(ft_itoa(123), "123"))
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 	if (!strcmp(ft_itoa(2147483647), "2147483647"))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (!strcmp(ft_itoa(-2), "-2"))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (!strcmp(ft_itoa(-2147483648), "-2147483648"))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (!strcmp(ft_itoa(0), "0"))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	if (!strcmp(ft_itoa(489652), "489652"))
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, " [FAILED] ", NC);
 	printf("\n");
 }
 
@@ -929,157 +943,157 @@ int		main(void)
 	test_ft_putstr();
 	test_ft_putendl();
 
-	printf("\n!TEST!\t--\tft_memset\n");
+	printf("%s%s%s", LCYAN, "!TEST!\t--\tft_memset\n", NC);
 	printf("\tResults from MEMSET (STRING.H) below:\n\t");
 	test_ft_memset(memset);
 	printf("\tResults from FT_MEMSET (YOURS) below:\n\t");
 	test_ft_memset(ft_memset);
 
-	printf("\n!TEST!\t--\tft_bzero\n");
+	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_bzero\n", NC);
 	printf("\tResults from BZERO (STRING.H) below:\n\t");
 	test_ft_bzero(bzero);
 	printf("\tResults from FT_BZERO (YOURS) below:\n\t");
 	test_ft_bzero(ft_bzero);
 
-	printf("\n!TEST!\t--\tft_memcpy");
+	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_memcpy\n", NC);
 	printf("\tResults from MEMCPY (STRING.H) below:\n\t");
 	test_ft_memcpy(memcpy);
 	printf("\tResults from FT_MEMCPY (YOURS) below:\n\t");
 	test_ft_memcpy(ft_memcpy);
 
-	printf("\n!TEST!\t--\tft_memccpy\n");
+	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_memccpy\n", NC);
 	printf("\tResults from MEMCCPY (STRING.H) below:\n\t");
 	test_ft_memccpy(memccpy);
 	printf("\tResults from FT_MEMCCPY (YOURS) below:\n\t");
 	test_ft_memccpy(ft_memccpy);
 
-	printf("\n!TEST!\t--\tft_memcmp\n");
+	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_memcmp\n", NC);
 	printf("\tResults from MEMCMP (STRING.H) below:\n\t");
 	test_ft_memcmp(memcmp);
 	printf("\tResults from FT_MEMCMP (YOURS) below:\n\t");
 	test_ft_memcmp(ft_memcmp);
 
-	printf("\n!TEST!\t--\tft_memmove");
+	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_memmove\n", NC);
 	printf("\tResults from MEMMOVE (STRING.H) below:\n\t");
 	test_ft_memmove(memmove);
 	printf("\tResults from FT_MEMMOVE (YOURS) below:\n\t");
 	test_ft_memmove(ft_memmove);
 
-	printf("\n!TEST!\t--\tft_memchr\n");
+	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_memchr\n", NC);
 	printf("\tResults from MEMCHR (STRING.H) below:\n\t");
 	test_ft_memchr(memchr);
 	printf("\tResults from FT_MEMCHR (YOURS) below:\n\t");
 	test_ft_memchr(ft_memchr);
 
-	printf("\n!TEST!\t--\tft_strlen\n");
+	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_strlen\n", NC);
 	printf("\tResults from STRLEN (STRING.H) below:\n\t");
 	test_ft_strlen(strlen);
 	printf("\tResults from FT_STRLEN (YOURS) below:\n\t");
 	test_ft_strlen(ft_strlen);
 
-	printf("\n!TEST!\t--\tft_strdup\n");
+	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_strdup\n", NC);
 	printf("\tResults from STRDUP (STRING.H) below:\n\t");
 	test_ft_strdup(strdup);
 	printf("\tResults from FT_STRDUP (YOURS) below:\n\t");
 	test_ft_strdup(ft_strdup);
 
-	printf("\n!TEST!\t--\tft_strcpy\n");
+	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_strcpy\n", NC);
 	printf("\tResults from STRCPY (STRING.H) below:\n\t");
 	test_ft_strcpy(strcpy);
 	printf("\tResults from FT_STRCPY (YOURS) below:\n\t");
 	test_ft_strcpy(ft_strcpy);
 
-	printf("\n!TEST!\t--\tft_strncpy\n");
+	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_strncpy\n", NC);
 	printf("\tResults from STRNCPY (STRING.H) below:\n\t");
 	test_ft_strncpy(strncpy);
 	printf("\tResults from FT_STRNCPY (YOURS) below:\n\t");
 	test_ft_strncpy(ft_strncpy);
 
-	printf("\n!TEST!\t--\tft_strcat\n");
+	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_strcat\n", NC);
 	printf("\tResults from STRCAT (STRING.H) below:\n\t");
 	test_ft_strcat(strcat);
 	printf("\tResults from FT_STRCAT (YOURS) below:\n\t");
 	test_ft_strcat(ft_strcat);
 
-	printf("\n!TEST!\t--\tft_strncat\n");
+	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_strncat\n", NC);
 	printf("\tResults from STRNCAT (STRING.H) below:\n\t");
 	test_ft_strncat(strncat);
 	printf("\tResults from FT_STRNCAT (YOURS) below:\n\t");
 	test_ft_strncat(ft_strncat);
 
-	printf("\n!TEST!\t--\tft_strlcat\n");
+	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_strlcat\n", NC);
 	printf("\tResults from STRLCAT (STRING.H) below:\n\t");
 	test_ft_strlcat(strlcat);
 	printf("\tResults from FT_STRLCAT (YOURS) below:\n\t");
 	test_ft_strlcat(ft_strlcat);
 
-	printf("\n!TEST!\t--\tft_strchr\n");
+	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_strchr\n", NC);
 	printf("\tResults from STRCHR (STRING.H) below:\n\t");
 	test_ft_strchr(strchr);
 	printf("\tResults from FT_STRCHR (YOURS) below:\n\t");
 	test_ft_strchr(ft_strchr);
 
-	printf("\n!TEST!\t--\tft_strrchr\n");
+	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_strrchr\n", NC);
 	printf("\tResults from STRRCHR (STRING.H) below:\n\t");
 	test_ft_strrchr(strrchr);
 	printf("\tResults from FT_STRRCHR (YOURS) below:\n\t");
 	test_ft_strrchr(ft_strrchr);
 
-	printf("\n!TEST!\t--\tft_strcmp\n");
+	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_strcmp\n", NC);
 	printf("\tResults from STRCMP (STRING.H) below:\n\t");
 	test_ft_strcmp(strcmp);
 	printf("\tResults from FT_STRCMP (YOURS) below:\n\t");
 	test_ft_strcmp(ft_strcmp);
 
-	printf("\n!TEST!\t--\tft_strncmp\n");
+	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_strncmp\n", NC);
 	printf("\tResults from STRNCMP (STRING.H) below:\n\t");
 	test_ft_strncmp(strncmp);
 	printf("\tResults from FT_STRNCMP (YOURS) below:\n\t");
 	test_ft_strncmp(ft_strncmp);
 
-	printf("\n!TEST!\t--\tft_strstr\n");
+	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_strstr\n", NC);
 	printf("\tResults from STRSTR (STRING.H) below:\n\t");
 	test_ft_strstr(strstr);
 	printf("\tResults from FT_STRSTR (YOURS) below:\n\t");
 	test_ft_strstr(ft_strstr);
 
-	printf("\n!TEST!\t--\tft_strnstr\n");
+	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_strnstr\n", NC);
 	printf("\tResults from STRNSTR (STRING.H) below:\n\t");
 	test_ft_strnstr(strnstr);
 	printf("\tResults from FT_STRNSTR (YOURS) below:\n\t");
 	test_ft_strnstr(ft_strnstr);
 
-	printf("\n!TEST!\t--\tft_atoi\n");
+	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_atoi\n", NC);
 	printf("\tResults from ATOI (STRING.H) below:\n\t");
 	test_ft_atoi(atoi);
 	printf("\tResults from FT_ATOI (YOURS) below:\n\t");
 	test_ft_atoi(ft_atoi);
 
-	printf("\n!TEST!\t--\tft_isalpha\n");
+	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_isalpha\n", NC);
 	printf("\tResults from ISALPHA (STRING.H) below:\n\t");
 	test_ft_isalpha(isalpha);
 	printf("\tResults from FT_ISALPHA (YOURS) below:\n\t");
 	test_ft_isalpha(ft_isalpha);
 
-	printf("\n!TEST!\t--\tft_isdigit\n");
+	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_isdigit\n", NC);
 	printf("\tResults from ISDIGIT (STRING.H) below:\n\t");
 	test_ft_isdigit(isdigit);
 	printf("\tResults from FT_ISDIGIT (YOURS) below:\n\t");
 	test_ft_isdigit(ft_isdigit);
 
-	printf("\n!TEST!\t--\tft_strnew\n\t");
+	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_strnew\n\t", NC);
 	test_ft_strnew();
 
-	printf("\n!TEST!\t--\tft_strjoin\n\t");
+	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_strjoin\n\t", NC);
 	test_ft_strjoin();
 
-	printf("\n!TEST!\t--\tft_strtrim\n\t");
+	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_strtrim\n\t", NC);
 	test_ft_strtrim();
 
-	printf("\n!TEST!\t--\tft_strsplit\n\t");
+	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_strsplit\n\t", NC);
 	test_ft_strsplit();
 
-	printf("\n!TEST!\t--\tft_itoa\n\t");
+	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_itoa\n\t", NC);
 	test_ft_itoa();
 
 	return (0);

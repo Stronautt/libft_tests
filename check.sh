@@ -1,7 +1,12 @@
 #!/bin/sh
 
+#Color Library
+#START
+NC="\033[0m"; GREEN="\033[32m"; RED="\033[31m"; YELLOW="\033[33m"; LCYAN="\033[96m";
+#END
+
 if [[ $1 = "bonus" ]]; then
-	echo "!Start TESTING BONUS PART!\n";
+	echo "${LCYAN}!Start TESTING BONUS PART!${NC}\n";
 
 	#Deleting old library
 	rm -f libft_b.a;
@@ -19,7 +24,7 @@ if [[ $1 = "bonus" ]]; then
 		ranlib libft_b.a;
 	else
 		rm -f *.o;
-		echo "\n!TEST!\t--\tCOMPILING ERROR\t--\t[ABORT]\n"
+		echo "\n${YELLOW}!TEST!\t--\tCOMPILING ERROR\t--\t[ABORT]${NC}\n"
 		exit $COMPILING;
 	fi
 
@@ -38,7 +43,7 @@ if [[ $1 = "bonus" ]]; then
 	#Clean trash
 	rm -f libft_b.a test_b.out;
 elif [[ $1 = "boom" ]]; then
-	echo "!!!!CAUTION\t--\tSELF DESTRUCTION!!!!"
+	echo "${RED}!!!!CAUTION\t--\tSELF DESTRUCTION!!!!${NC}"
 	rm -f test.c test_b.c check.sh;	
 elif [[ -z $1  ]] || [[ $1 = "debug" ]]; then
 	#Deleting old testing binary
@@ -50,14 +55,14 @@ elif [[ -z $1  ]] || [[ $1 = "debug" ]]; then
 		elif [[ -n "$(find ../ -name "auteur")" ]]; then
 			AUTHOR_FILE="auteur"
 		else
-			echo "!NO auteur or author file found!\n";
+			echo "${RED}!NO auteur or author file found!${NC}\n";
 		fi
 
 		if [[ -n $AUTHOR_FILE ]]; then
 			if [[ $(cat ../$AUTHOR_FILE) = $(whoami) ]]; then
-				echo "AUTHOR IS\t--\t"$(cat ../$AUTHOR_FILE)"\t--\t[OK]\n";
+				echo "${GREEN}AUTHOR IS\t--\t"$(cat ../$AUTHOR_FILE)"\t--\t[OK]${NC}\n";
 			else
-				echo "AUTHOR IS\t--\t"$(cat ../$AUTHOR_FILE)"\t--\t[STOLEN]\n";
+				echo "${RED}AUTHOR IS\t--\t"$(cat ../$AUTHOR_FILE)"\t--\t[STOLEN]${NC}\n";
 			fi
 		fi		
 
@@ -65,12 +70,12 @@ elif [[ -z $1  ]] || [[ $1 = "debug" ]]; then
 		NORM_ERRORS=$(norminette ../*.c ../*.h | grep "^Error\|^Warning" -B 1);
 
 		if [[ -n "${NORM_ERRORS}" ]]; then
-			echo "!TEST!\t--\tNORMINETTE\t--\t[FAILED]\n";
+			echo "${RED}!TEST!\t--\tNORMINETTE\t--\t[FAILED]${NC}\n";
 			echo ${NORM_ERRORS}"
 		\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 		||||||||||||||||||||||||||||||||||||||||||||||\n";
 		else
-			echo "!TEST!\t--\tNORMINETTE\t--\t[OK]\n";
+			echo "${GREEN}!TEST!\t--\tNORMINETTE\t--\t[OK]${NC}\n";
 		fi
 		
 		#Deleting old library
@@ -81,18 +86,18 @@ elif [[ -z $1  ]] || [[ $1 = "debug" ]]; then
 
 		#Checking up for Makefile
 		if [[ -z "$(find ../ -name "Makefile")" ]]; then
-			echo "!NO Makefile file found!\n";
+			echo "${RED}!NO Makefile file found!${NC}\n";
 		else
 			CURRDIR=$(pwd)
 			cd ../;
 			MAKEFILE=$(make > /dev/null && make);
 			make clean > /dev/null;
 			if [[ $MAKEFILE != "make: Nothing to be done for \`all'." ]]; then
-				echo "!TEST!\t--\tMAKEFILE\t--\t[FAILED]\n";
+				echo "${RED}!TEST!\t--\tMAKEFILE\t--\t[FAILED]${NC}\n";
 			elif [[ -z "$(find . -name "libft.a")" ]]; then
-				echo "!TEST!\t--\tMAKEFILE\t--\t[FAILED]\n";
+				echo "${RED}!TEST!\t--\tMAKEFILE\t--\t[FAILED]${NC}\n";
 			else
-				echo "!TEST!\t--\tMAKEFILE\t--\t[OK]\n";
+				echo "${GREEN}!TEST!\t--\tMAKEFILE\t--\t[OK]${NC}\n";
 			fi
 			make fclean > /dev/null;
 			cd $CURRDIR;
@@ -111,7 +116,7 @@ elif [[ -z $1  ]] || [[ $1 = "debug" ]]; then
 			ranlib libft.a;
 		else
 			rm -f *.o;
-			echo "\n!TEST!\t--\tCOMPILING ERROR\t--\t[ABORT]\n"
+			echo "\n${RED}!TEST!\t--\tCOMPILING ERROR\t--\t[ABORT]${NC}\n"
 			exit $COMPILING;
 		fi
 	fi
@@ -119,7 +124,7 @@ elif [[ -z $1  ]] || [[ $1 = "debug" ]]; then
 	if [[ -z "$(find . -name "test.out")" ]]; then
 		if [[ -z "$(find . -name "test.c")" ]]
 		then
-			echo "!TEST!\t--\tTEST PROGRAM MISSING\t--\t[ABORT]\n";
+			echo "${YELLOW}!TEST!\t--\tTEST PROGRAM MISSING\t--\t[ABORT]${NC}\n";
 		else
 			#Compiling test source file with library
 			gcc -w test.c libft.a -o test.out;

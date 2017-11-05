@@ -6,7 +6,7 @@
 /*   By: pgritsen <pgritsen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/11/01 16:08:49 by pgritsen          #+#    #+#             */
-/*   Updated: 2017/11/04 20:32:38 by pgritsen         ###   ########.fr       */
+/*   Updated: 2017/11/05 14:34:13 by pgritsen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+
+char	NC[] = "\033[0m",
+		GREEN[] = "\033[32m",
+		RED[] = "\033[31m",
+		YELLOW[] = "\033[33m",
+		LCYAN[] = "\033[96m";
 
 static void	del(void *data, size_t size)
 {
@@ -82,15 +88,15 @@ static void	test_ft_lstnew()
 
 	tmp = ft_lstnew("Hello", 6);
 	if (tmp != NULL && !strcmp(tmp->content, "Hello") && tmp->content_size == 6)
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 
 	tmp = ft_lstnew(NULL, 6);
 	if (tmp->content == NULL && tmp->content_size == 0)
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 	printf("\n");
 }
 
@@ -109,13 +115,13 @@ static void	test_ft_lstdelone()
 
 	ft_lstdelone(&tmp, &del);
 	if (tmp == NULL)
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 	if (!strcmp((*tmp2)->content, "World") && (*tmp2)->content_size == 6)
-		printf(" [OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf(" [FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 	printf("\n");
 }
 
@@ -134,9 +140,9 @@ static void	test_ft_lstdel()
 
 	ft_lstdel(&tmp, &del);
 	if (tmp == NULL)
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 	printf("\n");
 }
 
@@ -155,9 +161,9 @@ static void	test_ft_lstadd()
 
 	ft_lstadd(&tmp, tmp2);
 	if (!strcmp(tmp->content, "World"))
-		printf("[OK] ");
+		printf("%s%s%s", GREEN, "[OK] ", NC);
 	else
-		printf("[FAILED] ");
+		printf("%s%s%s", RED, "[FAILED] ", NC);
 	printf("\n");
 }
 
@@ -176,9 +182,11 @@ static void	test_ft_lstiter()
 	tmp->next->next->content_size = 6;
 	tmp->next->next->next = NULL;
 
+	printf("%s", GREEN);
 	ft_lstiter(tmp, &print);
+	printf("%s", NC);	
 
-	printf("\t(If above no text \"|Test    --      [OK]|\", test failed)\n");
+	printf("\t%s*(If above no text \"%s|Test    --      [OK]|%s\", test failed)%s\n", YELLOW, GREEN, YELLOW, NC);
 }
 
 static void	test_ft_lstmap()
@@ -198,8 +206,8 @@ static void	test_ft_lstmap()
 
 	tmp2 = ft_lstmap(tmp, &listr);
 
-	printf("\t|%s%s%s|\n", tmp2->content, tmp2->next->content, tmp2->next->next->content);
-	printf("\t(If above no text \"|Test    --      [OK]    |\", test failed)\n");
+	printf("\t%s|%s%s%s|%s\n", GREEN, tmp2->content, tmp2->next->content, tmp2->next->next->content, NC);
+	printf("\t%s*(If above no text \"%s|Test    --      [OK]    |%s\", test failed)%s\n", YELLOW, GREEN, YELLOW, NC);
 
 	ft_lstdel_my(&tmp, &del);
 	ft_lstdel_my(&tmp2, &del);
@@ -220,27 +228,27 @@ static void	test_ft_lstmap()
 
 	tmp2 = ft_lstmap(tmp, &listr_c);
 
-	printf("\t|%s%s%s|\n", tmp2->content, tmp2->next->content, tmp2->next->next->content);
-	printf("\t(If above no text \"|Test    --      [OK]    |\", test failed)\n");
+	printf("\t%s|%s%s%s|%s\n", GREEN, tmp2->content, tmp2->next->content, tmp2->next->next->content, NC);
+	printf("\t%s*(If above no text \"%s|Test    --      [OK]    |%s\", test failed)%s\n", YELLOW, GREEN, YELLOW, NC);
 }
 
 int		main()
 {
-	printf("!TEST!\t--\tft_lstnew\t\n");
+	printf("%s!TEST!\t--\tft_lstnew%s\t\n", LCYAN, NC);
 	test_ft_lstnew();
 
-	printf("\n!TEST!\t--\tft_lstdelone\t\n");
+	printf("\n%s!TEST!\t--\tft_lstdelone%s\t\n", LCYAN, NC);
 	test_ft_lstdelone();
 
-	printf("\n!TEST!\t--\tft_lstdel\t\n");
+	printf("\n%s!TEST!\t--\tft_lstdel%s\t\n", LCYAN, NC);
 	test_ft_lstdel();
 
-	printf("\n!TEST!\t--\tft_lstadd\t\n");
+	printf("\n%s!TEST!\t--\tft_lstadd%s\t\n", LCYAN, NC);
 	test_ft_lstadd();
 
-	printf("\n!TEST!\t--\tft_lstiter\t\n");
+	printf("\n%s!TEST!\t--\tft_lstiter%s\t\n", LCYAN, NC);
 	test_ft_lstiter();
 
-	printf("\n!TEST!\t--\tft_lstmap\t\n");
+	printf("\n%s!TEST!\t--\tft_lstmap%s\t\n", LCYAN, NC);
 	test_ft_lstmap();
 }
