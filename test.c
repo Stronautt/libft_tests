@@ -6,7 +6,7 @@
 /*   By: pgritsen <pgritsen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/25 18:07:22 by pgritsen          #+#    #+#             */
-/*   Updated: 2017/11/05 14:39:04 by pgritsen         ###   ########.fr       */
+/*   Updated: 2017/11/06 18:16:17 by pgritsen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <signal.h>
+#include <errno.h>
+#include <time.h>
+#include <pthread.h>
 
 /*
 **		Color Library
@@ -22,21 +27,113 @@
 char	NC[] = "\033[0m",
 		GREEN[] = "\033[32m",
 		RED[] = "\033[31m",
+		FRED[] = "\033[41m",
 		YELLOW[] = "\033[33m",
 		LCYAN[] = "\033[96m";
 
+static char *output_get(void (*func)(const char *), const char *s)
+{
+	char	*buffer;
+	int		out_pipe[2];
+	int		saved_stdout;
+
+	buffer = (char *)malloc(sizeof(char) * 128);
+	bzero(buffer, 128);
+
+	saved_stdout = dup(fileno(stdout)); 
+
+	if(pipe(out_pipe) != 0)
+		return (NULL);
+
+	dup2(out_pipe[1], fileno(stdout));
+	close(out_pipe[1]);
+
+	func(s);
+
+	read(out_pipe[0], buffer, 128);
+	dup2(saved_stdout, fileno(stdout));
+
+	return (buffer);
+}
+
+static void	childpid_sig(pid_t pid)
+{
+	int status;
+	waitpid(pid, &status, NULL);
+	if (status == SIGSEGV)
+		printf(" %s[SEGFAULT]%s ", FRED, NC);
+	else if (status == SIGBUS)
+		printf(" %s[BUSERROR]%s ", FRED, NC);
+	else if (status)
+		printf(" %s[CRASH]%s ", FRED, NC);
+}
+
 static void	test_ft_putstr(void)
 {
-	printf("%s!TEST!\t--\tft_putstr%s\n", LCYAN, GREEN);
-	ft_putstr("\t[OK]");
-	printf("%s\n", NC);
+	pid_t pid_a, pid_b;
+	char	*buff;
+	
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		printf("\t");
+		if (!(buff = output_get(&ft_putstr, "i'm putstr")))
+			exit(EXIT_FAILURE);
+		if (!strcmp(buff, "i'm putstr"))
+			printf("%s[OK]%s", GREEN, NC);
+		else
+			printf("%s[ERROR]%s", RED, NC);
+		free(buff);
+		exit(EXIT_SUCCESS);
+	}
+	else
+	{
+		childpid_sig(pid_a);
+		pid_b = fork();
+		if (pid_b == 0)
+		{
+			ft_putstr(NULL);
+			printf("%s [OK]%s", GREEN, NC);
+			exit(EXIT_SUCCESS);
+		}
+		else
+			childpid_sig(pid_b);
+	}
+	printf("\n\n");
 }
 
 static void	test_ft_putendl(void)
 {
-	printf("%s!TEST!\t--\tft_putendl%s\n", LCYAN, GREEN);
-	ft_putendl("\t[OK]");
-	printf("%s\n", NC);
+	pid_t pid_a, pid_b;
+	char	*buff;
+	
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		printf("\t");
+		if (!(buff = output_get(&ft_putendl, "i'm putstr")))
+			exit(EXIT_FAILURE);
+		if (!strcmp(buff, "i'm putstr\n"))
+			printf("%s[OK]%s", GREEN, NC);
+		else
+			printf("%s[ERROR]%s", RED, NC);
+		free(buff);
+		exit(EXIT_SUCCESS);
+	}
+	else
+	{
+		childpid_sig(pid_a);
+		pid_b = vfork();
+		if (pid_b == 0)
+		{
+			ft_putendl(NULL);
+			printf("%s [OK]%s", GREEN, NC);
+			exit(EXIT_SUCCESS);
+		}
+		else
+			childpid_sig(pid_b);
+	}
+	printf("\n\n");
 }
 
 static void test_ft_memset(void *(*func)(void *, int, size_t))
@@ -299,7 +396,7 @@ static void	test_ft_memchr(void *(*func)(const void *, int, size_t))
 static void	test_ft_memcmp(int (*func)(const void *, const void *, size_t))
 {
 	char	buffer1[] = "DWgaOtP12df0";
-	char	buffer2[] = "DWgaOtP12DF0";
+	char	buffer2[] = "DWgaOtP12DF0i";
 	int		n1;
 	int		n2;
 
@@ -318,6 +415,17 @@ static void	test_ft_memcmp(int (*func)(const void *, const void *, size_t))
 		printf("%s%s%s", GREEN, " [OK] ", NC);
 	else
 		printf("%s%s%s", RED, " [FAILED] ", NC);
+
+	char buffer3[] = "lox mydak";
+	char buffer4[] = "lox mydaki";
+
+	n1 = memcmp(buffer3, buffer4, 10);
+	n2 = func(buffer3, buffer4, 10);
+
+	if (n1 == n2)
+		printf("%s%s%s", GREEN, " [OK] ", NC);
+	else
+		printf("%s%s%s", RED, " [FAILED] ", NC);	
 	printf("\n");
 }
 
@@ -937,10 +1045,12 @@ static void	test_ft_itoa()
 	printf("\n");
 }
 
-
 int		main(void)
 {
-	test_ft_putstr();
+    printf("%s!TEST!\t--\tft_putstr%s\n", LCYAN, NC);
+    test_ft_putstr();
+	
+	printf("%s!TEST!\t--\tft_putendl%s\n", LCYAN, NC);
 	test_ft_putendl();
 
 	printf("%s%s%s", LCYAN, "!TEST!\t--\tft_memset\n", NC);
