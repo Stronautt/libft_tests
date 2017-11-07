@@ -16,7 +16,12 @@ FBLUE="\033[44m"; LMAGENTA="\033[95m"; DEFAULT="\033[39m"; FWHITE="\033[107m"; B
 #END
 
 if [[ $1 = "bonus" ]]; then
-	echo "${LCYAN}!Start TESTING BONUS PART!${NC}\n";
+	echo "${LCYAN}
+ ____   ___  _   _ _   _ ____    ____   _    ____ _____ 
+| __ ) / _ \| \ | | | | / ___|  |  _ \ / \  |  _ |_   _|
+|  _ \| | | |  \| | | | \___ \  | |_) / _ \ | |_) || |  
+| |_) | |_| | |\  | |_| |___) | |  __/ ___ \|  _ < | |  
+|____/ \___/|_| \_|\___/|____/  |_| /_/   \_|_| \_\|_|${NC}\n";
 
 	#Deleting old library
 	rm -f libft_b.a;
@@ -53,9 +58,11 @@ if [[ $1 = "bonus" ]]; then
 	#Clean trash
 	rm -f libft_b.a test_b.out;
 elif [[ $1 = "boom" ]]; then
-	echo "${RED}";
-	centerQ "!!!!CAUTION\t--\tSELF DESTRUCTION!!!!";
-	echo "${NC}";
+	echo "${FRED}
+╔═╗╔═╗╦  ╔═╗  ╔╦╗╔═╗╔═╗╔╦╗╦═╗╦ ╦╔═╗╔╦╗╦╔═╗╔╗╔
+╚═╗║╣ ║  ╠╣    ║║║╣ ╚═╗ ║ ╠╦╝║ ║║   ║ ║║ ║║║║
+╚═╝╚═╝╩═╝╚    ═╩╝╚═╝╚═╝ ╩ ╩╚═╚═╝╚═╝ ╩ ╩╚═╝╝╚╝${NC}";
+
 	rm -f test.c test_b.c check.sh;	
 elif [[ -z $1  ]] || [[ $1 = "debug" ]]; then
 	echo "${FBLUE}\n${NC}${GREEN}

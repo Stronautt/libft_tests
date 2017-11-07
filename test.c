@@ -6,7 +6,7 @@
 /*   By: pgritsen <pgritsen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/25 18:07:22 by pgritsen          #+#    #+#             */
-/*   Updated: 2017/11/06 18:16:17 by pgritsen         ###   ########.fr       */
+/*   Updated: 2017/11/07 12:31:23 by pgritsen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,12 +24,24 @@
 **		Color Library
 */
 
+#define MB_SIZE 1048576
+
 char	NC[] = "\033[0m",
 		GREEN[] = "\033[32m",
 		RED[] = "\033[31m",
 		FRED[] = "\033[41m",
 		YELLOW[] = "\033[33m",
 		LCYAN[] = "\033[96m";
+
+char	ERRORS[MB_SIZE];
+
+static void	add_error(char	*s1, char	*s2)
+{	
+	strlcat(ERRORS, s1, sizeof(ERRORS));
+	if (s2)
+		strlcat(ERRORS, s2, sizeof(ERRORS));
+	strlcat(ERRORS, "\n\n", sizeof(ERRORS));
+}
 
 static char *output_get(void (*func)(const char *), const char *s)
 {
@@ -56,16 +68,66 @@ static char *output_get(void (*func)(const char *), const char *s)
 	return (buffer);
 }
 
-static void	childpid_sig(pid_t pid)
+static void	*mem_replace(void *str, char sb, char t_sb, size_t n)
+{
+	unsigned char *s = str;
+
+	if (!s)
+		return (NULL);
+	while (n--)
+	{
+		if (*s == sb)
+			*s = t_sb;
+		s++;
+	}
+	return (str);
+}
+
+static char *output_get_fd(void (*func)(const char *, int), const char *s)
+{
+	char	*buffer;
+	int		out_pipe[2];
+	int		saved_stdout;
+
+	buffer = (char *)malloc(sizeof(char) * 128);
+	bzero(buffer, 128);
+
+	saved_stdout = dup(2); 
+
+	if(pipe(out_pipe) != 0)
+		return (NULL);
+
+	dup2(out_pipe[1], 2);
+	close(out_pipe[1]);
+
+	func(s, 2);
+
+	read(out_pipe[0], buffer, 128);
+	dup2(saved_stdout, 2);
+
+	return (buffer);
+}
+
+static int	childpid_sig(pid_t pid)
 {
 	int status;
 	waitpid(pid, &status, NULL);
 	if (status == SIGSEGV)
+	{
 		printf(" %s[SEGFAULT]%s ", FRED, NC);
+		return (SIGSEGV);
+	}
 	else if (status == SIGBUS)
+	{
 		printf(" %s[BUSERROR]%s ", FRED, NC);
+		return (SIGBUS);
+	}
 	else if (status)
+	{
 		printf(" %s[CRASH]%s ", FRED, NC);
+		return (1);
+	}
+	return (0);
 }
 
 static void	test_ft_putstr(void)
@@ -78,17 +140,24 @@ static void	test_ft_putstr(void)
 	{
 		printf("\t");
 		if (!(buff = output_get(&ft_putstr, "i'm putstr")))
+		{
+			add_error("[ERROR] - ft_putstr : ft_putstr(\"i'm putstr\") -> ", buff);
 			exit(EXIT_FAILURE);
+		}
 		if (!strcmp(buff, "i'm putstr"))
 			printf("%s[OK]%s", GREEN, NC);
 		else
+		{
 			printf("%s[ERROR]%s", RED, NC);
+			add_error("[ERROR] - ft_putstr : ft_putstr(\"i'm putstr\") -> ", buff);
+		}
 		free(buff);
 		exit(EXIT_SUCCESS);
 	}
 	else
 	{
-		childpid_sig(pid_a);
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - ft_putstr : ft_putstr(\"i'm putstr\")", NULL);
 		pid_b = fork();
 		if (pid_b == 0)
 		{
@@ -97,7 +166,8 @@ static void	test_ft_putstr(void)
 			exit(EXIT_SUCCESS);
 		}
 		else
-			childpid_sig(pid_b);
+			if(childpid_sig(pid_b))
+				add_error("[CRASH] - ft_putstr : ft_putstr(NULL)", NULL);
 	}
 	printf("\n\n");
 }
@@ -111,19 +181,26 @@ static void	test_ft_putendl(void)
 	if (pid_a == 0)
 	{
 		printf("\t");
-		if (!(buff = output_get(&ft_putendl, "i'm putstr")))
+		if (!(buff = output_get(&ft_putendl, "i'm putendl")))
+		{
+			add_error("[ERROR] - ft_putendl : ft_putendl(\"i'm putendl\") -> ", buff);
 			exit(EXIT_FAILURE);
-		if (!strcmp(buff, "i'm putstr\n"))
+		}
+		if (!strcmp(buff, "i'm putendl\n"))
 			printf("%s[OK]%s", GREEN, NC);
 		else
+		{
 			printf("%s[ERROR]%s", RED, NC);
+			add_error("[ERROR] - ft_putendl : ft_putendl(\"i'm putendl\") -> ", buff);			
+		}
 		free(buff);
 		exit(EXIT_SUCCESS);
 	}
 	else
 	{
-		childpid_sig(pid_a);
-		pid_b = vfork();
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - ft_putendl : ft_putendl(\"i'm putendl\")", NULL);
+		pid_b = fork();
 		if (pid_b == 0)
 		{
 			ft_putendl(NULL);
@@ -131,7 +208,8 @@ static void	test_ft_putendl(void)
 			exit(EXIT_SUCCESS);
 		}
 		else
-			childpid_sig(pid_b);
+			if (childpid_sig(pid_b))
+				add_error("[CRASH] - ft_putendl : ft_putendl(NULL)", NULL);
 	}
 	printf("\n\n");
 }
@@ -146,35 +224,73 @@ static void test_ft_memset(void *(*func)(void *, int, size_t))
 	char	ft_s2[] = "Hello World!";
 	char	ft_s3[] = "Hello World!";
 	char	ft_s4[] = "Hello World!";
+	pid_t pid_a, pid_b, pid_c, pid_d;
 
-	memset(s1, '\0', 4);
-	func(ft_s1, '\0', 4);
-	if (!memcmp(s1, ft_s1, sizeof(s1)))
-		printf("%s%s%s", GREEN, "[OK] ", NC);
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		memset(s1, '\0', 4);
+		func(ft_s1, '\0', 4);
+		if (s1 && ft_s1 && !memcmp(s1, ft_s1, sizeof(s1)))
+			printf("%s%s%s", GREEN, "[OK] ", NC);
+		else
+		{
+			add_error("[ERROR] - ft_memset : ft_memset(ft_s1, '\0', 4) -> ft_s1 : ", mem_replace(ft_s1, '\0', '0', sizeof(ft_s1) - 1));
+			printf("%s%s%s", RED, "[FAILED] ", NC);
+		}
+		exit(EXIT_SUCCESS);
+	}
 	else
-		printf("%s%s%s", RED, "[FAILED] ", NC);
-
-	memset(s2, '\200', 0);
-	func(ft_s2, '\200', 0);
-	if (!memcmp(s2, ft_s2, sizeof(s2)))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-
-	memset(s3, 'O', sizeof(s3));
-	func(ft_s3, 'O', sizeof(ft_s3));
-	if (!memcmp(s3, ft_s3, sizeof(s3)))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-
-	memset(s4, '-', 1);
-	func(ft_s4, '-', 1);
-	if (!memcmp(s4, ft_s4, sizeof(s4)))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	printf("\n");
+	{
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - ft_memset : ft_memset(ft_s1, '\0', 4) -> ft_s1 : ", mem_replace(ft_s1, '\0', '0', sizeof(ft_s1) - 1));;
+		pid_b = fork();
+		if (pid_b == 0)
+		{
+			memset(s2, '\200', 0);
+			func(ft_s2, '\200', 0);
+			if (s2 && ft_s2 && !memcmp(s2, ft_s2, sizeof(s2)))
+				printf("%s%s%s", GREEN, " [OK] ", NC);
+			else
+				printf("%s%s%s", RED, " [FAILED] ", NC);
+			exit(EXIT_SUCCESS);
+		}
+		else
+		{
+			childpid_sig(pid_b);
+			pid_c = fork();
+			if (pid_c == 0)
+			{
+				memset(s3, 'O', sizeof(s3));
+				func(ft_s3, 'O', sizeof(ft_s3));
+				if (!memcmp(s3, ft_s3, sizeof(s3)))
+					printf("%s%s%s", GREEN, " [OK] ", NC);
+				else
+					printf("%s%s%s", RED, " [FAILED] ", NC);
+				exit(EXIT_SUCCESS);
+			}
+			else
+			{
+				childpid_sig(pid_c);
+				pid_d = fork();
+				if (pid_d == 0)
+				{
+					memset(s4, '-', 1);
+					func(ft_s4, '-', 1);
+					if (!memcmp(s4, ft_s4, sizeof(s4)))
+						printf("%s%s%s", GREEN, " [OK] ", NC);
+					else
+						printf("%s%s%s", RED, " [FAILED] ", NC);
+					exit(EXIT_SUCCESS);
+				}
+				else
+				{
+					childpid_sig(pid_d);
+					printf("\n");
+				}
+			}
+		}		
+	}
 }
 
 static void test_ft_bzero(void *(*func)(void *, size_t))
