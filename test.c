@@ -6,7 +6,7 @@
 /*   By: pgritsen <pgritsen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/25 18:07:22 by pgritsen          #+#    #+#             */
-/*   Updated: 2017/11/07 13:21:52 by pgritsen         ###   ########.fr       */
+/*   Updated: 2017/11/07 19:04:46 by pgritsen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,54 @@ static void	*mem_replace(void *str, char sb, char t_sb, size_t n)
 	return (str);
 }
 
+static char	*q_strrev(char *s)
+{
+	char	*p_s;
+	size_t	it;
+	char	buff;
+
+	if ((p_s = s) == NULL)
+		return (NULL);
+	while (*p_s)
+		p_s++;
+	it = 0;
+	while (s + it < p_s--)
+	{
+		buff = s[it];
+		s[it++] = *p_s;
+		*p_s = buff;
+	}
+	return (s);
+}
+
+static char		*q_itoa(int n)
+{
+	char		*num;
+	int			sign;
+	int			it;
+	long int	n_l;
+
+	sign = 0;
+	if (n < 0)
+		sign = 1;
+	if (n == 0)
+		return (strdup("0"));
+	if ((num = (char *)malloc(INT_MAX_LEN + sign + 1)) == NULL)
+		return (NULL);
+	it = 0;
+	if (sign)
+		num[it++] = '-';
+	n_l = n;
+	while (n_l)
+	{
+		num[it++] = ABS(n_l % 10) + '0';
+		n_l /= 10;
+	}
+	num[it] = 0;
+	num = q_strrev(num + sign);
+	return (num -= sign);
+}
+
 static char *output_get_fd(void (*func)(const char *, int), const char *s)
 {
 	char	*buffer;
@@ -111,6 +159,7 @@ static char *output_get_fd(void (*func)(const char *, int), const char *s)
 static int	childpid_sig(pid_t pid)
 {
 	int status;
+	alarm(5);
 	waitpid(pid, &status, NULL);
 	if (status == SIGSEGV)
 	{
@@ -464,145 +513,286 @@ static void	test_ft_memcpy(void *(*func)(void *, const void *, size_t))
 
 static void test_ft_memccpy(void *(*func)(void *, const void *, int, size_t))
 {
-	char	destination[24];
-	char	ft_destination[24];
 	char	src[] = "test basic du memccpy !";
+	pid_t	pid_a, pid_b, pid_c, pid_d;
 
-	char *r1, *r2;
-	char buff1[22];
-	char buff2[22];
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		char *r1, *r2;
+		char buff1[22];
+		char buff2[22];
 
-	r1 = memccpy(buff1, src, 'z', 22);
-	r2 = func(buff2, src, 'z', 22);
+		r1 = memccpy(buff1, src, 'z', 22);
+		r2 = func(buff2, src, 'z', 22);
 
-	char	buf1[] = "Ceci est un test.";
-	char	buf2[200];
-	void	*p1, *p2;
-
-	p1 = memccpy(buf2, buf1, 'i', 10);
-	p2 = func(buf2, buf1, 'i', 10);
-
-	if (p1 == p2)
-		printf("%s%s%s", GREEN, "[OK] ", NC);
+		if (r1 == r2)
+			printf("%s%s%s", GREEN, " [OK] ", NC);
+		else
+		{
+			printf("%s%s%s", RED, " [FAILED] ", NC);
+			add_error("[ERROR] - ft_memccpy :\nchar	src[] = \"test basic du memccpy !\";\nft_memccpy(buff1, src, 'z', 22) -> buff1 : ", buff1);
+		}
+		exit(EXIT_SUCCESS);
+	}
 	else
-		printf("%s%s%s", RED, "[FAILED] ", NC);
+	{
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - ft_memccpy :\nchar	src[] = \"test basic du memccpy !\";\nft_memccpy(buff1, src, 'z', 22);", NULL);
+		pid_b = fork();
+		if (pid_b == 0)
+		{
+			char	buf1[] = "Ceci est un test.";
+			char	buf2[200];
+			void	*p1, *p2;
 
-	if (r1 == r2)
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
+			p1 = memccpy(buf2, buf1, 'i', 10);
+			p2 = func(buf2, buf1, 'i', 10);
 
-	func(ft_destination, src, '\0', strlen(src) + 1);
-	memccpy(destination, src, '\0', strlen(src) + 1);
+			if (p1 == p2)
+				printf("%s%s%s", GREEN, "[OK] ", NC);
+			else
+			{
+				printf("%s%s%s", RED, "[FAILED] ", NC);
+				add_error("[ERROR] - ft_memccpy :\nchar	buf1[] = \"Ceci est un test.\";\nft_memccpy(buf2, buf1, 'i', 10) -> buf2 : ", buf2);
+			}
+			exit(EXIT_SUCCESS);
+		}
+		else
+		{
+			if (childpid_sig(pid_b))
+				add_error("[CRASH] - ft_memccpy :\nchar	buf1[] = \"Ceci est un test.\";\nft_memccpy(buf2, buf1, 'i', 10);", NULL);			
+			char	destination[24];
+			char	ft_destination[24];
 
-	if (!strcmp(destination, ft_destination))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
+			pid_c = fork();
+			if (pid_c == 0)
+			{
+				func(ft_destination, src, '\0', strlen(src) + 1);
+				memccpy(destination, src, '\0', strlen(src) + 1);
 
-	func(ft_destination, src, 'R', strlen(src) + 1);
-	memccpy(destination, src, 'R', strlen(src) + 1);
+				if (!strcmp(destination, ft_destination))
+					printf("%s%s%s", GREEN, " [OK] ", NC);
+				else
+				{
+					printf("%s%s%s", RED, " [FAILED] ", NC);
+					add_error("[ERROR] - ft_memccpy :\nchar	src[] = \"test basic du memccpy !\";\nft_memccpy(ft_destination, src, '\0', strlen(src) + 1) -> ft_destination : ", ft_destination);
+				}
+				exit(EXIT_SUCCESS);			
+			}
+			else
+			{
+				if (childpid_sig(pid_c))
+					add_error("[CRASH] - ft_memccpy :\nchar	src[] = \"test basic du memccpy !\";\nft_memccpy(ft_destination, src, '\0', strlen(src) + 1);", NULL);
+				pid_d = fork();
+				if (pid_d == 0)
+				{
+					func(ft_destination, src, 'R', strlen(src) + 1);
+					memccpy(destination, src, 'R', strlen(src) + 1);
 
-	if (!strcmp(destination, ft_destination))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	printf("\n");
+					if (!strcmp(destination, ft_destination))
+						printf("%s%s%s", GREEN, " [OK] ", NC);
+					else
+					{
+						printf("%s%s%s", RED, " [FAILED] ", NC);
+						add_error("[ERROR] - ft_memccpy :\nchar	src[] = \"test basic du memccpy !\";\nft_memccpy(ft_destination, src, 'R', strlen(src) + 1) -> ft_destination : ", ft_destination);
+					}
+					exit(EXIT_SUCCESS);	
+				}
+				else
+				{
+					if (childpid_sig(pid_d))
+						add_error("[CRASH] - ft_memccpy :\nchar	src[] = \"test basic du memccpy !\";\nft_memccpy(ft_destination, src, 'R', strlen(src) + 1);", NULL);
+					printf("\n");
+				}
+			}
+		}
+	}
 }
 
 static void test_ft_memmove(void *(*func)(void *, const void *, size_t))
 {
 	char	a[128] = "OKOKO World!";
-	char	ft_a[128] = "OKOKO World!";
-	char	b[] = "It's Perfect!!!";
+	char	ft_a[128] = "OKOKO World!";	
 
-	func(ft_a, "Hello", 5);
-	memmove(a, "Hello", 5);
-	if (!strncmp(a, ft_a, sizeof(a)))
-		printf("%s%s%s", GREEN, "[OK] ", NC);
+	pid_t	pid_a, pid_b, pid_c, pid_d;
+
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		func(ft_a, "Hello", 5);
+		memmove(a, "Hello", 5);
+		if (!strncmp(a, ft_a, sizeof(a)))
+			printf("%s%s%s", GREEN, "[OK] ", NC);
+		else
+		{
+			printf("%s%s%s", RED, "[FAILED] ", NC);
+			add_error("[ERROR] - ft_memmove :\nchar	ft_a[128] = \"OKOKO World!\";\nft_memmove(ft_a, \"Hello\", 5) -> ft_a : ", ft_a);
+		}
+		exit(EXIT_SUCCESS);
+	}
 	else
-		printf("%s%s%s", RED, "[FAILED] ", NC);
+	{
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - ft_memmove :\nchar	ft_a[128] = \"OKOKO World!\";\nft_memmove(ft_a, \"Hello\", 5);", NULL);
+		pid_b = fork();
+		if (pid_b == 0)
+		{
+			func(ft_a, "H\0llo", 5);
+			memmove(a, "H\0llo", 5);
+			if (!strncmp(a, ft_a, sizeof(a)))
+				printf("%s%s%s", GREEN, " [OK] ", NC);
+			else
+			{
+				printf("%s%s%s", RED, " [FAILED] ", NC);
+				add_error("[ERROR] - ft_memmove :\nchar	ft_a[128] = \"Hello World!\";\nft_memmove(ft_a, \"H\0llo\", 5) -> ft_a : ",
+					mem_replace(ft_a, 0, '0', sizeof(ft_a) - 1));
+			}
+			exit(EXIT_SUCCESS);
+		}
+		else
+		{
+			if (childpid_sig(pid_b))
+				add_error("[CRASH] - ft_memmove :\nchar	ft_a[128] = \"Hello World!\";\nft_memmove(ft_a, \"H\0llo\", 5);", NULL);
+			pid_c = fork();
+			if (pid_c == 0)
+			{
+				char	b[] = "It's Perfect!!!";
 
-	func(ft_a, "H\0llo", 5);
-	memmove(a, "H\0llo", 5);
-	if (!strncmp(a, ft_a, sizeof(a)))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-
-	func(ft_a, b, strlen(b) + 1);
-	memmove(a, b, strlen(b) + 1);
-	if (!strncmp(a, ft_a, sizeof(a)))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-
-	func(ft_a + 15, ft_a + 4, 11);
-	memmove(a + 15, a + 4, 11);
-	if (!strncmp(a, ft_a, sizeof(a)))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-
-	int		dst, ft_dst, src = 2147483647;
-
-	func(&dst, &src, 4);
-	memmove(&ft_dst, &src, 4);
-	if (dst == ft_dst)
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	printf("\n");
+				bzero(ft_a, sizeof(ft_a));
+				bzero(a, sizeof(a));
+				strcpy(ft_a, "OKOKO World!");
+				strcpy(a, "OKOKO World!");
+				func(ft_a, b, strlen(b) + 1);
+				memmove(a, b, strlen(b) + 1);
+				if (!strncmp(a, ft_a, sizeof(a)))
+					printf("%s%s%s", GREEN, " [OK] ", NC);
+				else
+				{
+					printf("%s%s%s", RED, " [FAILED] ", NC);
+					add_error("[ERROR] - ft_memmove :\nchar	ft_a[128] = \"OKOKO World!\";\nchar	b[] = \"It's Perfect!!!\";\nft_memmove(ft_a, b, strlen(b) + 1) -> ft_a : ", ft_a);
+				}
+				exit(EXIT_SUCCESS);			
+			}
+			else
+			{
+				if (childpid_sig(pid_c))
+					add_error("[CRASH] - ft_memmove :\nchar	ft_a[128] = \"OKOKO World!\";\nchar	b[] = \"It's Perfect!!!\";\nft_memmove(ft_a, b, strlen(b) + 1);", NULL);
+				pid_d = fork();
+				if (pid_d == 0)
+				{
+					bzero(ft_a, sizeof(ft_a));
+					bzero(a, sizeof(a));
+					strcpy(ft_a, "It's Perfect!!!");
+					strcpy(a, "It's Perfect!!!");
+					func(ft_a + 15, ft_a + 4, 11);
+					memmove(a + 15, a + 4, 11);
+					if (!strncmp(a, ft_a, sizeof(a)))
+						printf("%s%s%s", GREEN, " [OK] ", NC);
+					else
+					{
+						printf("%s%s%s", RED, " [FAILED] ", NC);
+						add_error("[ERROR] - ft_memmove :\nchar	ft_a[128] = \"It's Perfect!!!\";\nft_memmove(ft_a + 15, ft_a + 4, 11) -> ft_a : ", ft_a);
+					}
+					exit(EXIT_SUCCESS);	
+				}
+				else
+				{
+					if (childpid_sig(pid_d))
+						add_error("[CRASH] - ft_memmove :\nchar	ft_a[128] = \"It's Perfect!!!\";\nft_memmove(ft_a + 15, ft_a + 4, 11);", NULL);
+					printf("\n");
+				}
+			}
+		}
+	}
 }
 
 static void	test_ft_memchr(void *(*func)(const void *, int, size_t))
-{	
+{
 	char	*s2;
 	char	*s3;
 	char	*s4;
 	char	*ft_p;
-	char	*p;	
+	char	*p;
 
 	char	s1[] = "Example string";
 	s2 = "";
 	s3 = "abcdefabcdef";
 	s4 = "11111111111111111111";
 
-	p = (char *)memchr(s1, 'p', strlen(s1));
-	ft_p = (char *)func(s1, 'p', strlen(s1));
-	if (ft_p != NULL && p - s1 == ft_p - s1)
-		printf("%s%s%s", GREEN, "[OK] ", NC);
+	pid_t	pid_a, pid_b, pid_c, pid_d;
+
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		p = (char *)memchr(s1, 'p', strlen(s1));
+		ft_p = (char *)func(s1, 'p', strlen(s1));
+		if (ft_p != NULL && p - s1 == ft_p - s1)
+			printf("%s%s%s", GREEN, "[OK] ", NC);
+		else
+		{			
+			printf("%s%s%s", RED, "[FAILED] ", NC);
+			add_error("[ERROR] - ft_memchr :\nchar s1[] = \"Example string\";\nft_memchr(s1, 'p', strlen(s1)) -> ", p);
+		}
+		exit(EXIT_SUCCESS);
+	}
 	else
-		printf("%s%s%s", RED, "[FAILED] ", NC);
-	if (func(s2, 'x', 0) == NULL)
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func(s3, 'y', 0) == NULL)
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if ((char *)func(s3, 'a', 1) - s3 == 0)
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func(s3, 'd', 2)  == NULL)
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if ((char *)func(s3, 'd', 12)  - s3 == 3)
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if ((char *)func(s3, 'f', 12)  - s3 == 5)
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if ((char *)func(s4, '1', 20)  - s4 == 0)
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	printf("\n");
+	{
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - ft_memchr :\nchar s1[] = \"Example string\";\nft_memchr(s1, 'p', strlen(s1));", NULL);
+		pid_b = fork();
+		if (pid_b == 0)
+		{
+			if (func(s2, 'x', 0) == NULL)
+				printf("%s%s%s", GREEN, " [OK] ", NC);
+			else
+			{
+				printf("%s%s%s", RED, " [FAILED] ", NC);
+				add_error("[ERROR] - ft_memchr :\nchar *s2 = \"\";\nft_memchr(s2, 'x', 0) -> ", ft_memchr(s2, 'x', 0));
+			}
+			exit(EXIT_SUCCESS);
+		}
+		else
+		{
+			if (childpid_sig(pid_b))
+				add_error("[CRASH] - ft_memchr :\nchar *s2 = \"\";\nft_memchr(s2, 'x', 0);", NULL);
+			pid_c = fork();
+			if (pid_c == 0)
+			{
+				if (func(s3, 'y', 0) == NULL)
+					printf("%s%s%s", GREEN, " [OK] ", NC);
+				else
+				{
+					printf("%s%s%s", RED, " [FAILED] ", NC);
+					add_error("[ERROR] - ft_memchr :\nchar *s3 = \"abcdefabcdef\";\nft_memchr(s3, 'y', 0) -> ", ft_memchr(s3, 'y', 0));
+				}
+				exit(EXIT_SUCCESS);			
+			}
+			else
+			{
+				if (childpid_sig(pid_c))
+					add_error("[CRASH] - ft_memchr :\nchar *s3 = \"abcdefabcdef\";\nft_memchr(s3, 'y', 0);", NULL);
+				pid_d = fork();
+				if (pid_d == 0)
+				{
+					if ((char *)func(s4, '1', 20)  - s4 == 0)
+						printf("%s%s%s", GREEN, " [OK] ", NC);
+					else
+					{
+						printf("%s%s%s", RED, " [FAILED] ", NC);
+						add_error("[ERROR] - ft_memchr :\nchar *s4 = \"abcdefabcdef\";\nft_memchr(s4, '1', 20) -> ", ft_memchr(s4, '1', 20));
+					}
+					exit(EXIT_SUCCESS);
+				}
+				else
+				{
+					if (childpid_sig(pid_d))
+						add_error("[CRASH] - ft_memchr :\nchar *s4 = \"abcdefabcdef\";\nft_memchr(s4, '1', 20);", NULL);
+					printf("\n");
+				}
+			}
+		}
+	}
 }
 
 static void	test_ft_memcmp(int (*func)(const void *, const void *, size_t))
@@ -611,83 +801,202 @@ static void	test_ft_memcmp(int (*func)(const void *, const void *, size_t))
 	char	buffer2[] = "DWgaOtP12DF0i";
 	int		n1;
 	int		n2;
+	pid_t	pid_a, pid_b, pid_c, pid_d;
 
-	n1 = memcmp(buffer1, buffer2, sizeof(buffer1));
-	n2 = func(buffer1, buffer2, sizeof(buffer1));
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		n1 = memcmp(buffer1, buffer2, sizeof(buffer1));
+		n2 = func(buffer1, buffer2, sizeof(buffer1));
 
-	if (n1 == n2)
-		printf("%s%s%s", GREEN, "[OK] ", NC);
+		if (n1 == n2)
+			printf("%s%s%s", GREEN, "[OK] ", NC);
+		else
+		{
+			printf("%s%s%s", RED, "[FAILED] ", NC);
+			add_error("[ERROR] - ft_memcmp :\nchar buffer1[] = \"DWgaOtP12df0\";\nchar	buffer2[] = \"DWgaOtP12DF0i\";\nft_memcmp(buffer1, buffer2, sizeof(buffer1)) -> ", q_itoa(n2));
+		}
+		exit(EXIT_SUCCESS);
+	}
 	else
-		printf("%s%s%s", RED, "[FAILED] ", NC);
+	{
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - ft_memcmp :\nchar buffer1[] = \"DWgaOtP12df0\";\nchar	buffer2[] = \"DWgaOtP12DF0i\";\nft_memcmp(s4, '1', 20);", NULL);
+		pid_b = fork();
+		if (pid_b == 0)
+		{
+			n1 = memcmp(buffer1, buffer2, 9);
+			n2 = func(buffer1, buffer2, 9);
 
-	n1 = memcmp(buffer1, buffer2, 9);
-	n2 = func(buffer1, buffer2, 9);
+			if (n1 == n2 && n2 == 0)
+				printf("%s%s%s", GREEN, " [OK] ", NC);
+			else
+			{
+				printf("%s%s%s", RED, " [FAILED] ", NC);
+				add_error("[ERROR] - ft_memcmp :\nchar buffer1[] = \"DWgaOtP12df0\";\nchar	buffer2[] = \"DWgaOtP12DF0i\";\nft_memcmp(buffer1, buffer2, 9) -> ", q_itoa(n2));
+			}
+			exit(EXIT_SUCCESS);
+		}
+		else
+		{
+			if (childpid_sig(pid_b))
+				add_error("[CRASH] - ft_memcmp :\nchar buffer1[] = \"DWgaOtP12df0\";\nchar	buffer2[] = \"DWgaOtP12DF0i\";\nft_memcmp(buffer1, buffer2, 9);", NULL);
+			pid_c = fork();
+			if (pid_c == 0)
+			{
+				char buffer3[] = "lox mydak";
+				char buffer4[] = "lox mydaki";
 
-	if (n1 == n2 && n2 == 0)
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
+				n1 = memcmp(buffer3, buffer4, 10);
+				n2 = func(buffer3, buffer4, 10);
 
-	char buffer3[] = "lox mydak";
-	char buffer4[] = "lox mydaki";
-
-	n1 = memcmp(buffer3, buffer4, 10);
-	n2 = func(buffer3, buffer4, 10);
-
-	if (n1 == n2)
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);	
-	printf("\n");
+				if (n1 == n2)
+					printf("%s%s%s", GREEN, " [OK] ", NC);
+				else
+				{
+					printf("%s%s%s", RED, " [FAILED] ", NC);
+					add_error("[ERROR] - ft_memcmp :\nchar buffer3[] = \"lox mydak\";\nchar buffer4[] = \"lox mydaki\";\nft_memcmp(buffer3, buffer4, 10) -> ", q_itoa(n2));
+				}
+				exit(EXIT_SUCCESS);			
+			}
+			else
+			{
+				if (childpid_sig(pid_c))
+					add_error("[CRASH] - ft_memcmp :\nchar buffer3[] = \"lox mydak\";\nchar buffer4[] = \"lox mydaki\";\nft_memcmp(buffer3, buffer4, 10);", NULL);
+				printf("\n");				
+			}
+		}
+	}
 }
 
 static void	test_ft_strlen(size_t (*func)(const char *))
 {
-	if (func("Hello World!") == strlen("Hello World!"))
-		printf("%s%s%s", GREEN, "[OK] ", NC);
+	pid_t	pid_a, pid_b, pid_c, pid_d;
+
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		if (func("Hello World!") == strlen("Hello World!"))
+			printf("%s%s%s", GREEN, "[OK] ", NC);
+		else
+		{
+			printf("%s%s%s", RED, "[FAILED] ", NC);
+			add_error("[ERROR] - ft_strlen : ft_strlen(\"Hello World!\") -> ", q_itoa(ft_strlen("Hello World!")));
+		}
+		exit(EXIT_SUCCESS);
+	}
 	else
-		printf("%s%s%s", RED, "[FAILED] ", NC);
-	if (func("") == strlen(""))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func("H") == strlen("H"))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func("Hel\0lo World!") == strlen("Hel\0lo World!"))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	printf("\n");
+	{
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - ft_strlen : ft_strlen(\"Hello World!\");", NULL);
+		pid_b = fork();
+		if (pid_b == 0)
+		{
+			if (func("") == strlen(""))
+				printf("%s%s%s", GREEN, " [OK] ", NC);
+			else
+			{
+				printf("%s%s%s", RED, " [FAILED] ", NC);
+				add_error("[ERROR] - ft_strlen : ft_strlen(\"\") -> ", q_itoa(ft_strlen("")));
+			}
+			exit(EXIT_SUCCESS);
+		}
+		else
+		{
+			if (childpid_sig(pid_b))
+				add_error("[CRASH] - ft_strlen : ft_strlen(\"\");", NULL);
+			pid_c = fork();
+			if (pid_c == 0)
+			{
+				if (func("H") == strlen("H"))
+					printf("%s%s%s", GREEN, " [OK] ", NC);
+				else
+				{
+					printf("%s%s%s", RED, " [FAILED] ", NC);
+					add_error("[ERROR] - ft_strlen : ft_strlen(\"H\") -> ", q_itoa(ft_strlen("H")));
+				}
+				exit(EXIT_SUCCESS);			
+			}
+			else
+			{
+				if (childpid_sig(pid_c))
+					add_error("[CRASH] - ft_strlen : ft_strlen(\"H\");", NULL);
+				pid_d = fork();
+				if (pid_d == 0)
+				{
+					if (func("Hel\0lo World!") == strlen("Hel\0lo World!"))
+						printf("%s%s%s", GREEN, " [OK] ", NC);
+					else
+					{
+						printf("%s%s%s", RED, " [FAILED] ", NC);
+						add_error("[ERROR] - ft_strlen : ft_strlen(\"Hel\0lo World!\") -> ", q_itoa(ft_strlen("Hel\0lo World!")));
+					}
+					exit(EXIT_SUCCESS);	
+				}
+				else
+				{
+					if (childpid_sig(pid_d))
+						add_error("[CRASH] - ft_strlen : ft_strlen(\"Hel\0lo World!\");", NULL);
+					printf("\n");
+				}
+			}
+		}
+	}
 }
 
 static void	test_ft_strdup(char	*(*func)(const char *))
 {
 	char	s[11] = "0123456789";
-	char	empt[1];
+	char	empt[1] = {0};
 	char	*d_s;
 	char	*ft_d_s;
+	pid_t	pid_a, pid_b;
 
-	d_s = strdup(s);
-	ft_d_s = func(s);
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		d_s = strdup(s);
+		ft_d_s = func(s);
 
-	if (!strcmp(d_s, ft_d_s))
-		printf("%s%s%s", GREEN, "[OK] ", NC);
+		if (!strcmp(d_s, ft_d_s))
+			printf("%s%s%s", GREEN, "[OK] ", NC);
+		else
+		{
+			printf("%s%s%s", RED, "[FAILED] ", NC);
+			add_error("[ERROR] - ft_strdup :\nchar	s[11] = \"0123456789\";\nft_strdup(s) -> ", ft_d_s);
+		}
+		free(d_s);
+		free(ft_d_s);
+		exit(EXIT_SUCCESS);
+	}
 	else
-		printf("%s%s%s", RED, "[FAILED] ", NC);
+	{
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - ft_strdup :\nchar	s[11] = \"0123456789\";\nft_strdup(s);", NULL);
+		pid_b = fork();
+		if (pid_b == 0)
+		{
+			d_s = strdup(empt);
+			ft_d_s = func(empt);
 
-	d_s = strdup(empt);
-	ft_d_s = func(empt);
-
-	if (!strcmp(d_s, ft_d_s))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-
-	free(d_s);
-	free(ft_d_s);
-	printf("\n");
+			if (!strcmp(d_s, ft_d_s))
+				printf("%s%s%s", GREEN, " [OK] ", NC);
+			else
+			{
+				printf("%s%s%s", RED, " [FAILED] ", NC);
+				add_error("[ERROR] - ft_strdup :\nchar empt[1] = {0};\nft_strdup(empt) -> ", ft_d_s);
+			}
+			free(d_s);
+			free(ft_d_s);
+			exit(EXIT_SUCCESS);
+		}
+		else
+		{
+			if (childpid_sig(pid_b))
+				add_error("[CRASH] - ft_strdup :\nchar empt[1] = {0};\nft_strdup(empt);", NULL);
+			printf("\n");
+		}
+	}
 }
 
 static void	test_ft_strcpy(char	*(*func)(char *, const char *))
@@ -695,23 +1004,49 @@ static void	test_ft_strcpy(char	*(*func)(char *, const char *))
 	char	s[] = "Copy successful!";
 	char	ft_o[40];
 	char	o[40];
+	pid_t	pid_a, pid_b;
 
-	strcpy(o, s);
-	func(ft_o, s);
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		strcpy(o, s);
+		func(ft_o, s);
 
-	if (!strcmp(ft_o, o))
-		printf("%s%s%s", GREEN, "[OK] ", NC);
+		if (!strcmp(ft_o, o))
+			printf("%s%s%s", GREEN, "[OK] ", NC);
+		else
+		{
+			printf("%s%s%s", RED, "[FAILED] ", NC);
+			add_error("[ERROR] - ft_strcpy :\nchar s[] = \"Copy successful!\";\nft_strcpy(ft_o, s) -> ft_o : ", ft_o);
+		}
+		exit(EXIT_SUCCESS);
+	}
 	else
-		printf("%s%s%s", RED, "[FAILED] ", NC);
+	{
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - ft_strcpy :\nchar s[] = \"Copy successful!\";\nft_strcpy(ft_o, s);", NULL);
+		pid_b = fork();
+		if (pid_b == 0)
+		{
+			strcpy(o, "");
+			func(ft_o, "");
 
-	strcpy(o, "");
-	func(ft_o, "");
-
-	if (!strcmp(ft_o, o))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	printf("\n");
+			if (!strcmp(ft_o, o))
+				printf("%s%s%s", GREEN, " [OK] ", NC);
+			else
+			{
+				printf("%s%s%s", RED, " [FAILED] ", NC);
+				add_error("[ERROR] - ft_strcpy : ft_strcpy(ft_o, \"\") -> ft_o : ", ft_o);
+			}
+			exit(EXIT_SUCCESS);
+		}
+		else
+		{
+			if (childpid_sig(pid_b))
+				add_error("[CRASH] - ft_strcpy : ft_strcpy(ft_o, \"\");", NULL);
+			printf("\n");
+		}
+	}
 }
 
 static void	test_ft_strncpy(char *(*func)(char *, const char *, size_t))
@@ -719,93 +1054,144 @@ static void	test_ft_strncpy(char *(*func)(char *, const char *, size_t))
 	char	s[] = "Copy successful!";
 	char	ft_o[40];
 	char	o[40];
+	pid_t	pid_a, pid_b, pid_c, pid_d;
 
-	strncpy(o, s, sizeof(o));
-	func(ft_o, s, sizeof(ft_o));
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		strncpy(o, s, sizeof(o));
+		func(ft_o, s, sizeof(ft_o));
 
-	if (!strncmp(ft_o, o, sizeof(o)))
-		printf("%s%s%s", GREEN, "[OK] ", NC);
+		if (!strncmp(ft_o, o, sizeof(o)))
+			printf("%s%s%s", GREEN, "[OK] ", NC);
+		else
+		{
+			printf("%s%s%s", RED, "[FAILED] ", NC);
+			add_error("[ERROR] - ft_strncpy :\nchar s[] = \"Copy successful!\";\nft_strncpy(ft_o, s, sizeof(ft_o)) -> ft_o : ", ft_o);
+		}
+		exit(EXIT_SUCCESS);
+	}
 	else
-		printf("%s%s%s", RED, "[FAILED] ", NC);
+	{
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - ft_strncpy :\nchar s[] = \"Copy successful!\";\nft_strncpy(ft_o, s, sizeof(ft_o));", NULL);
+		pid_b = fork();
+		if (pid_b == 0)
+		{
+			strncpy(o, "", 1);
+			func(ft_o, "", 1);
 
-	strncpy(o, "", 1);
-	func(ft_o, "", 1);
-
-	if (!strncmp(ft_o, o, sizeof(o)))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-
-	char	s15[] = "Source";
-	char	d16[] = "Destin";
-	char	*p, *ft_p;
-
-	p = strncpy(d16, s15, 5);
-	ft_p = func(d16, s15, 5);
-
-	if (!strncmp(ft_p, p, sizeof(d16)))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	printf("\n");
+			if (!strncmp(ft_o, o, sizeof(o)))
+				printf("%s%s%s", GREEN, " [OK] ", NC);
+			else
+			{
+				printf("%s%s%s", RED, " [FAILED] ", NC);
+				add_error("[ERROR] - ft_strncpy : ft_strcpy(ft_o, \"\", 1) -> ft_o : ", ft_o);
+			}
+			exit(EXIT_SUCCESS);
+		}
+		else
+		{
+			if (childpid_sig(pid_b))
+				add_error("[CRASH] - ft_strncpy : ft_strcpy(ft_o, \"\", 1);", NULL);
+			printf("\n");
+		}
+	}
 }
 
 static void	test_ft_strcat(char	*(*func)(char *, const char *))
 {
 	char	s[80];
 	char	ft_s[80];
+	pid_t	pid_a;
 
-	strcpy(s,"these ");
-	strcpy(ft_s,"these ");
-	strcat(s,"strings are ");
-	func(ft_s,"strings are ");
-	strcat(s,"concatenated.");
-	func(ft_s,"concatenated.");
-	
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		strcpy(s, "these ");
+		strcpy(ft_s, "these ");
+		strcat(s, "strings are ");
+		func(ft_s, "strings are ");
+		strcat(s, "concatenated.");
+		func(ft_s, "concatenated.");		
 
-	if (!strncmp(s, ft_s, sizeof(s)))
-		printf("%s%s%s", GREEN, "[OK] ", NC);
+		if (!strncmp(s, ft_s, sizeof(s)))
+			printf("%s%s%s", GREEN, "[OK] ", NC);
+		else
+		{
+			printf("%s%s%s", RED, "[FAILED] ", NC);
+			add_error("[ERROR] - ft_strcat :\nchar ft_s[80];\nft_strcat(ft_s, \"strings are \");\nft_strcat(ft_s, \"concatenated.\") -> ft_s : ", ft_s);
+		}
+		exit(EXIT_SUCCESS);
+	}
 	else
-		printf("%s%s%s", RED, "[FAILED] ", NC);
-	printf("\n");
+	{
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - ft_strcat :\nchar ft_s[80];\nft_strcat(ft_s, \"strings are \");\nft_strcat(ft_s, \"concatenated.\");", NULL);
+		printf("\n");
+	}	
 }
 
 static void	test_ft_strncat(char *(*func)(char *, const char *, size_t))
 {
-	char	s[20];
+	char	s[20] = "or not to be";
 	char	*ft_p;
 	char	*p;
 	char	ft_o[20];
 	char	o[20];
+	pid_t	pid_a, pid_b;
 
-	strcpy(ft_o, "To be ");
-	strcpy(o, "To be ");
-	strcpy(s, "or not to be");
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		strcpy(ft_o, "To be ");
+		strcpy(o, "To be ");
 
-	p = strncat(o, s, 6);
-	ft_p = func(ft_o, s, 6);
-
-	if (!strncmp(o, ft_o, sizeof(o)))
-		printf("%s%s%s", GREEN, "[OK] ", NC);
+		p = strncat(o, s, 6);
+		ft_p = func(ft_o, s, 6);
+		if (!strncmp(o, ft_o, sizeof(o)))
+			printf("%s%s%s", GREEN, "[OK] ", NC);
+		else
+		{
+			printf("%s%s%s", RED, "[FAILED] ", NC);
+			add_error("[ERROR] - ft_strncat :\nchar s[20] = \"or not to be\";\nstrcpy(ft_o, \"To be \");\nft_strncat(ft_o, s, 6) -> ft_o : ", ft_o);
+		}
+		if (!strcmp(p, ft_p))
+			printf("%s%s%s", GREEN, " [OK] ", NC);
+		else
+		{
+			printf("%s%s%s", RED, " [FAILED] ", NC);
+			add_error("[ERROR] - ft_strncat :\nchar s[20] = \"or not to be\";\nstrcpy(ft_o, \"To be \");\nft_p = ft_strncat(ft_o, s, 6) -> ft_p : ", ft_p);
+		}
+		exit(EXIT_SUCCESS);
+	}
 	else
-		printf("%s%s%s", RED, "[FAILED] ", NC);
-
-	if (!strcmp(p, ft_p))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-
-	strcpy(ft_o, "To be ");
-	strcpy(o, "To be ");
-
-	p = strncat(o, s, 12);
-	ft_p = func(ft_o, s, 12);
-
-	if (!strncmp(o, ft_o, sizeof(o)) && !strcmp(p, ft_p))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	printf("\n");
+	{
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - t_strncat :\nchar s[20] = \"or not to be\";\nstrcpy(ft_o, \"To be \");\nft_p = ft_strncat(ft_o, s, 6);", NULL);
+		pid_b = fork();
+		if (pid_b == 0)
+		{
+			strcpy(ft_o, "To be ");
+			strcpy(o, "To be ");
+			p = strncat(o, s, 12);
+			ft_p = func(ft_o, s, 12);
+			if (!strncmp(o, ft_o, sizeof(o)) && !strcmp(p, ft_p))
+				printf("%s%s%s", GREEN, " [OK] ", NC);
+			else
+			{
+				printf("%s%s%s", RED, " [FAILED] ", NC);
+				add_error("[ERROR] - ft_strncat :\nchar s[20] = \"or not to be\";\nstrcpy(ft_o, \"To be \");\nft_p = ft_strncat(ft_o, s, 12) -> ft_p : ", ft_p);
+			}
+			exit(EXIT_SUCCESS);
+		}
+		else
+		{
+			if (childpid_sig(pid_b))
+				add_error("[CRASH] - ft_strncat :\nchar s[20] = \"or not to be\";\nstrcpy(ft_o, \"To be \");\nft_p = ft_strncat(ft_o, s, 12);", NULL);
+			printf("\n");
+		}
+	}
 }
 
 static void	test_ft_strlcat(size_t (*func)(char *, const char *, size_t))
@@ -816,159 +1202,481 @@ static void	test_ft_strlcat(size_t (*func)(char *, const char *, size_t))
 	char	ft_a[128] = "Hello";
 	char	a[128] = "Hello";
 	char	b[] = "Hello";
+	int		tmp;
+	pid_t	pid_a, pid_b, pid_c, pid_d, pid_e, pid_f, pid_g, pid_h;
 
 	ft_p_a = strdup("Hello");
 	p_a = strdup("Hello");
 	p_b = strdup(" World");
-	if (func(ft_p_a, p_b, strlen(p_b) + 1) == strlcat(p_a, p_b, strlen(p_b) + 1)
-		&& !strcmp(ft_p_a, p_a))
-		printf("%s%s%s", GREEN, "[OK] ", NC);
+
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		tmp = func(ft_p_a, p_b, strlen(p_b) + 1);
+		if (tmp == strlcat(p_a, p_b, strlen(p_b) + 1)
+			&& ft_p_a && !strcmp(ft_p_a, p_a))
+			printf("%s%s%s", GREEN, "[OK] ", NC);
+		else
+		{
+			printf("%s%s%s", RED, "[FAILED] ", NC);
+			add_error("[ERROR] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_p_a, p_b, strlen(p_b) + 1) -> ", q_itoa(tmp));
+		}
+		exit(EXIT_SUCCESS);
+	}
 	else
-		printf("%s%s%s", RED, "[FAILED] ", NC);
-	if (func(ft_p_a, p_b, sizeof(ft_p_a)) == strlcat(p_a, p_b, sizeof(p_a))
-		&& !strcmp(ft_p_a, p_a))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func(ft_p_a, p_b, 1) == strlcat(p_a, p_b, 1)
-		&& !strcmp(ft_p_a, p_a))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func(ft_p_a, p_b, -1) == strlcat(p_a, p_b, -1)
-		&& !strcmp(ft_p_a, p_a))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func(ft_a, b, 0) == strlcat(a, b, 0)
-		&& !strcmp(ft_a, a))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func(ft_a, b, strlen(b) + strlen(ft_a) + 1) == strlcat(a, b, strlen(b) + strlen(a) + 1)
-		&& !strcmp(ft_a, a))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func(ft_a, b, strlen(b) + strlen(ft_a) - 1) == strlcat(a, b, strlen(b) + strlen(a) - 1)
-		&& !strcmp(ft_a, a))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func(ft_a, b, strlen(b) + 1) == strlcat(a, b, strlen(b) + 1)
-		&& !strcmp(ft_a, a))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	printf("\n");
+	{
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_p_a, p_b, strlen(p_b) + 1);", NULL);
+		pid_b = fork();
+		if (pid_b == 0)
+		{
+			tmp = func(ft_p_a, p_b, sizeof(ft_p_a));
+			if (tmp == strlcat(p_a, p_b, sizeof(p_a))
+				&& ft_p_a && !strcmp(ft_p_a, p_a))
+				printf("%s%s%s", GREEN, " [OK] ", NC);
+			else
+			{
+				printf("%s%s%s", RED, " [FAILED] ", NC);
+				add_error("[ERROR] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_p_a, p_b, sizeof(ft_p_a)) -> ", q_itoa(tmp));
+			}
+			exit(EXIT_SUCCESS);
+		}
+		else
+		{
+			if (childpid_sig(pid_b))
+				add_error("[CRASH] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_p_a, p_b, sizeof(ft_p_a));", NULL);
+			pid_c = fork();
+			if (pid_c == 0)
+			{
+				tmp = func(ft_p_a, p_b, 1);
+				if (tmp == strlcat(p_a, p_b, 1)
+					&& ft_p_a && !strcmp(ft_p_a, p_a))
+					printf("%s%s%s", GREEN, " [OK] ", NC);
+				else
+				{
+					printf("%s%s%s", RED, " [FAILED] ", NC);
+					add_error("[ERROR] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_p_a, p_b, 1) -> ", q_itoa(tmp));
+				}
+				exit(EXIT_SUCCESS);			
+			}
+			else
+			{
+				if (childpid_sig(pid_c))
+					add_error("[CRASH] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_p_a, p_b, 1);", NULL);
+				pid_d = fork();
+				if (pid_d == 0)
+				{
+					tmp = func(ft_p_a, p_b, -1);
+					if (tmp == strlcat(p_a, p_b, -1)
+						&& ft_p_a && !strcmp(ft_p_a, p_a))
+						printf("%s%s%s", GREEN, " [OK] ", NC);
+					else
+					{
+						printf("%s%s%s", RED, " [FAILED] ", NC);
+						add_error("[ERROR] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_p_a, p_b, -1) -> ", q_itoa(tmp));
+					}
+					exit(EXIT_SUCCESS);	
+				}
+				else
+				{
+					if (childpid_sig(pid_d))
+						add_error("[CRASH] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_p_a, p_b, -1);", NULL);
+					pid_e = fork();
+					if (pid_e == 0)
+					{
+						tmp = func(ft_a, b, 0);
+						if (tmp == strlcat(a, b, 0)
+							&& ft_a && !strcmp(ft_a, a))
+							printf("%s%s%s", GREEN, " [OK] ", NC);
+						else
+						{
+							printf("%s%s%s", RED, " [FAILED] ", NC);
+							add_error("[ERROR] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_p_a, p_b, 0) -> ", q_itoa(tmp));
+						}
+						exit(EXIT_SUCCESS);
+					}
+					else
+					{
+						if (childpid_sig(pid_e))
+							add_error("[CRASH] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_p_a, p_b, 0);", NULL);
+						pid_f = fork();
+						if (pid_f == 0)
+						{
+							tmp = func(ft_a, b, strlen(b) + strlen(ft_a) + 1);
+							if (tmp == strlcat(a, b, strlen(b) + strlen(a) + 1)
+								&& ft_a && !strcmp(ft_a, a))
+								printf("%s%s%s", GREEN, " [OK] ", NC);
+							else
+							{
+								printf("%s%s%s", RED, " [FAILED] ", NC);
+								add_error("[ERROR] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_a, b, strlen(b) + strlen(ft_a) + 1) -> ", q_itoa(tmp));
+							}
+							exit(EXIT_SUCCESS);	
+						}
+						else
+						{
+							if (childpid_sig(pid_f))
+								add_error("[CRASH] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_a, b, strlen(b) + strlen(ft_a) + 1);", NULL);
+							pid_g = fork();
+							if (pid_g == 0)
+							{
+								tmp = func(ft_a, b, strlen(b) + strlen(ft_a) - 1);
+								if (tmp == strlcat(a, b, strlen(b) + strlen(a) - 1)
+									&& ft_a && !strcmp(ft_a, a))
+									printf("%s%s%s", GREEN, " [OK] ", NC);
+								else
+								{
+									printf("%s%s%s", RED, " [FAILED] ", NC);
+									add_error("[ERROR] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_a, b, strlen(b) + strlen(ft_a) - 1) -> ", q_itoa(tmp));
+								}
+								exit(EXIT_SUCCESS);
+							}
+							else
+							{
+								if (childpid_sig(pid_g))
+									add_error("[CRASH] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_a, b, strlen(b) + strlen(ft_a) - 1);", NULL);
+								pid_h = fork();
+								if (pid_h == 0)
+								{
+									tmp = func(ft_a, b, strlen(b) + 1);
+									if (tmp == strlcat(a, b, strlen(b) + 1)
+										&& ft_a && !strcmp(ft_a, a))
+										printf("%s%s%s", GREEN, " [OK] ", NC);
+									else
+									{
+										printf("%s%s%s", RED, " [FAILED] ", NC);
+										add_error("[ERROR] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_a, b, strlen(b) + 1)) -> ", q_itoa(tmp));
+									}
+									exit(EXIT_SUCCESS);
+								}
+								else
+								{
+									if (childpid_sig(pid_h))
+										add_error("[CRASH] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_a, b, strlen(b) + 1));", NULL);
+									printf("\n");
+								}
+							}
+						}
+					}					
+				}
+			}
+		}
+	}
 }
 
 static void	test_ft_strchr(char	*(*func)(const char *, int))
 {
 	char	ft_a[128] = "Hello World!";
 	char	a[128] = "Hello World!";
+	pid_t	pid_a, pid_b, pid_c, pid_d, pid_e;
 
-	if (!strncmp(func(ft_a, 'o'), strchr(a, 'o'), sizeof(a)))
-		printf("%s%s%s", GREEN, "[OK] ", NC);
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		if (!strncmp(func(ft_a, 'o'), strchr(a, 'o'), sizeof(a)))
+			printf("%s%s%s", GREEN, "[OK] ", NC);
+		else
+		{			
+			printf("%s%s%s", RED, "[FAILED] ", NC);
+			add_error("[ERROR] - ft_strchr :\nchar ft_a[128] = \"Hello World!\";\nft_strchr(ft_a, 'o') -> ", func(ft_a, 'o'));
+		}
+		exit(EXIT_SUCCESS);
+	}
 	else
-		printf("%s%s%s", RED, "[FAILED] ", NC);
-	if (func(ft_a, '3') == strchr(a, '3'))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (!strncmp(func(ft_a, '!'), strchr(a, '!'), sizeof(a)))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (!strncmp(func(ft_a, 0), strchr(a, 0), sizeof(a)))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (!strncmp(ft_a, a, sizeof(a)))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	printf("\n");
+	{
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - ft_strchr :\nchar ft_a[128] = \"Hello World!\";\nft_strchr(ft_a, 'o');", NULL);
+		pid_b = fork();
+		if (pid_b == 0)
+		{
+			if (func(ft_a, '3') == strchr(a, '3'))
+				printf("%s%s%s", GREEN, " [OK] ", NC);
+			else
+			{
+				printf("%s%s%s", RED, " [FAILED] ", NC);
+				add_error("[ERROR] - ft_strchr :\nchar ft_a[128] = \"Hello World!\";\nft_strchr(ft_a, '3') -> ", func(ft_a, '3'));
+			}
+			exit(EXIT_SUCCESS);
+		}
+		else
+		{
+			if (childpid_sig(pid_b))
+				add_error("[CRASH] - ft_strchr :\nchar ft_a[128] = \"Hello World!\";\nft_strchr(ft_a, '3');", NULL);
+			pid_c = fork();
+			if (pid_c == 0)
+			{
+				if (!strncmp(func(ft_a, '!'), strchr(a, '!'), sizeof(a)))
+					printf("%s%s%s", GREEN, " [OK] ", NC);
+				else
+				{
+					printf("%s%s%s", RED, " [FAILED] ", NC);
+					add_error("[ERROR] - ft_strchr :\nchar ft_a[128] = \"Hello World!\";\nft_strchr(ft_a, '!') -> ", func(ft_a, '!'));
+				}
+				exit(EXIT_SUCCESS);			
+			}
+			else
+			{
+				if (childpid_sig(pid_c))
+					add_error("[CRASH] - ft_strchr :\nchar ft_a[128] = \"Hello World!\";\nft_strchr(ft_a, '!');", NULL);
+				pid_d = fork();
+				if (pid_d == 0)
+				{
+					if (!strncmp(func(ft_a, 0), strchr(a, 0), sizeof(a)))
+						printf("%s%s%s", GREEN, " [OK] ", NC);
+					else
+					{
+						printf("%s%s%s", RED, " [FAILED] ", NC);
+						add_error("[ERROR] - ft_strchr :\nchar ft_a[128] = \"Hello World!\";\nft_strchr(ft_a, 0) -> ", func(ft_a, 0));
+					}
+					exit(EXIT_SUCCESS);	
+				}
+				else
+				{
+					if (childpid_sig(pid_d))
+						add_error("[CRASH] - ", NULL);
+					pid_e = fork();
+					if (pid_e == 0)
+					{
+						if (!strncmp(ft_a, a, sizeof(a)))
+							printf("%s%s%s", GREEN, " [OK] ", NC);
+						else
+						{
+							printf("%s%s%s", RED, " [FAILED] ", NC);
+							add_error("[ERROR] - ft_strchr :\nchar ft_a[128] = \"Hello World!\";\nft_strchr(ft_a, '0') -> ft_a : ", ft_a);
+						}
+						exit(EXIT_SUCCESS);
+					}
+					else
+					{
+						if (childpid_sig(pid_e))
+							add_error("[CRASH] - ft_strchr :\nchar ft_a[128] = \"Hello World!\";\nft_strchr(ft_a, '0');", NULL);
+						printf("\n");
+					}					
+				}
+			}
+		}
+	}
 }
 
 static void	test_ft_strrchr(char *(*func)(const char *, int))
 {
 	char	ft_a[128] = "Hello World!";
 	char	a[128] = "Hello World!";
+	pid_t	pid_a, pid_b, pid_c, pid_d;
 
-	if (!strncmp(func(ft_a, 'o'), strrchr(a, 'o'), sizeof(a)))
-		printf("%s%s%s", GREEN, "[OK] ", NC);
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		if (!strncmp(func(ft_a, 'o'), strrchr(a, 'o'), sizeof(a)))
+			printf("%s%s%s", GREEN, "[OK] ", NC);
+		else
+		{
+			printf("%s%s%s", RED, "[FAILED] ", NC);
+			add_error("[ERROR] - ft_strrchr :\nchar ft_a[128] = \"Hello World!\";\nft_strrchr(ft_a, 'o') -> ", func(ft_a, 'o'));
+		}
+		exit(EXIT_SUCCESS);
+	}
 	else
-		printf("%s%s%s", RED, "[FAILED] ", NC);
-	if (func(ft_a, '3') == strrchr(a, '3'))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (!strncmp(func(ft_a, '!'), strrchr(a, '!'), sizeof(a)))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (!strncmp(func(ft_a, 0), strrchr(a, 0), sizeof(a)))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (!strncmp(ft_a, a, sizeof(a)))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	printf("\n");
+	{
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - ft_strrchr :\nchar ft_a[128] = \"Hello World!\";\nft_strrchr(ft_a, 'o');", NULL);
+		pid_b = fork();
+		if (pid_b == 0)
+		{
+			if (func(ft_a, '3') == strrchr(a, '3'))
+				printf("%s%s%s", GREEN, " [OK] ", NC);
+			else
+			{
+				printf("%s%s%s", RED, " [FAILED] ", NC);
+				add_error("[ERROR] - ft_strrchr :\nchar ft_a[128] = \"Hello World!\";\nft_strrchr(ft_a, '3') -> ", func(ft_a, '3'));
+			}
+			exit(EXIT_SUCCESS);
+		}
+		else
+		{
+			if (childpid_sig(pid_b))
+				add_error("[CRASH] - ft_strrchr :\nchar ft_a[128] = \"Hello World!\";\nft_strrchr(ft_a, '3');", NULL);
+			pid_c = fork();
+			if (pid_c == 0)
+			{
+				if (!strncmp(func(ft_a, '!'), strrchr(a, '!'), sizeof(a)))
+					printf("%s%s%s", GREEN, " [OK] ", NC);
+				else
+				{
+					printf("%s%s%s", RED, " [FAILED] ", NC);
+					
+				}
+				exit(EXIT_SUCCESS);			
+			}
+			else
+			{
+				if (childpid_sig(pid_c))
+					add_error("[CRASH] - ft_strrchr :\nchar ft_a[128] = \"Hello World!\";\nft_strrchr(ft_a, '!');", NULL);
+				pid_d = fork();
+				if (pid_d == 0)
+				{
+					if (!strncmp(func(ft_a, 0), strrchr(a, 0), sizeof(a)))
+						printf("%s%s%s", GREEN, " [OK] ", NC);
+					else
+					{
+						printf("%s%s%s", RED, " [FAILED] ", NC);
+						add_error("[ERROR] - ft_strrchr :\nchar ft_a[128] = \"Hello World!\";\nft_strrchr(ft_a, 0) -> ", func(ft_a, 0));
+					}
+					exit(EXIT_SUCCESS);	
+				}
+				else
+				{
+					if (childpid_sig(pid_d))
+						add_error("[CRASH] - ft_strrchr :\nchar ft_a[128] = \"Hello World!\";\nft_strrchr(ft_a, 0);", NULL);
+					printf("\n");
+				}
+			}
+		}
+	}
 }
 
 static void	test_ft_strstr(char *(*func)(const char *, const char *))
 {
 	const char *largestring = "Foo Bar Baz";
+	pid_t	pid_a, pid_b, pid_c, pid_d;
 
-	if (!strcmp(func(largestring, "Bar"), strstr(largestring, "Bar")))
-		printf("%s%s%s", GREEN, "[OK] ", NC);
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		if (func(largestring, "Bar") && !strcmp(func(largestring, "Bar"), strstr(largestring, "Bar")))
+			printf("%s%s%s", GREEN, "[OK] ", NC);
+		else
+		{
+			printf("%s%s%s", RED, "[FAILED] ", NC);
+			add_error("[ERROR] - ft_strstr :\nconst char *largestring = \"Foo Bar Baz\";\nft_strstr(largestring, \"Bar\") -> ", func(largestring, "Bar"));
+		}
+		exit(EXIT_SUCCESS);
+	}
 	else
-		printf("%s%s%s", RED, "[FAILED] ", NC);
-	if (!strcmp(strstr(largestring, ""), func(largestring, "")))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func(largestring, "QW") == NULL
-		&& strstr(largestring, "QW") == NULL)
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (!strcmp(func(largestring, "Ba"), strstr(largestring, "Ba")))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	printf("\n");
+	{
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - ft_strstr :\nconst char *largestring = \"Foo Bar Baz\";\nft_strstr(largestring, \"Bar\");", NULL);
+		pid_b = fork();
+		if (pid_b == 0)
+		{
+			if (!strcmp(strstr(largestring, ""), func(largestring, "")))
+				printf("%s%s%s", GREEN, " [OK] ", NC);
+			else
+			{
+				printf("%s%s%s", RED, " [FAILED] ", NC);
+				add_error("[ERROR] - ft_strstr :\nconst char *largestring = \"Foo Bar Baz\";\nft_strstr(largestring, \"\") -> ", func(largestring, ""));
+			}
+			exit(EXIT_SUCCESS);
+		}
+		else
+		{
+			if (childpid_sig(pid_b))
+				add_error("[CRASH] - ft_strstr :\nconst char *largestring = \"Foo Bar Baz\";\nft_strstr(largestring, \"\");", NULL);
+			pid_c = fork();
+			if (pid_c == 0)
+			{
+				if (func(largestring, "QW") == NULL
+					&& strstr(largestring, "QW") == NULL)
+					printf("%s%s%s", GREEN, " [OK] ", NC);
+				else
+				{
+					printf("%s%s%s", RED, " [FAILED] ", NC);
+					add_error("[ERROR] - ft_strstr :\nconst char *largestring = \"Foo Bar Baz\";\nft_strstr(largestring, \"QW\") -> ", func(largestring, "QW"));
+				}
+				exit(EXIT_SUCCESS);			
+			}
+			else
+			{
+				if (childpid_sig(pid_c))
+					add_error("[CRASH] - ft_strstr :\nconst char *largestring = \"Foo Bar Baz\";\nft_strstr(largestring, \"QW\");", NULL);
+				pid_d = fork();
+				if (pid_d == 0)
+				{
+					if (!strcmp(func(largestring, "Ba"), strstr(largestring, "Ba")))
+						printf("%s%s%s", GREEN, " [OK] ", NC);
+					else
+					{
+						printf("%s%s%s", RED, " [FAILED] ", NC);
+						add_error("[ERROR] - ft_strstr :\nconst char *largestring = \"Foo Bar Baz\";\nft_strstr(largestring, \"Ba\") -> ", func(largestring, "Ba"));
+					}
+					exit(EXIT_SUCCESS);	
+				}
+				else
+				{
+					if (childpid_sig(pid_d))
+						add_error("[CRASH] - ft_strstr :\nconst char *largestring = \"Foo Bar Baz\";\nft_strstr(largestring, \"Ba\");", NULL);
+					printf("\n");
+				}
+			}
+		}
+	}
 }
 
 static void	test_ft_strnstr(char *(*func)(const char *, const char *, size_t))
 {
 	const char largestring[] = "MZIRIBMZIRIBMZE123";
+	pid_t	pid_a, pid_b, pid_c;
 
-	if (!strcmp(func(largestring, "MZIRIBMZE", -1), strnstr(largestring, "MZIRIBMZE", -1))
-		&& func(largestring, "MZIRIBMZE", 7) == strnstr(largestring, "MZIRIBMZE", 7))
-		printf("%s%s%s", GREEN, "[OK] ", NC);
-	else	
-		printf("%s%s%s", RED, "[FAILED] ", NC);
-	for (int i = 1; i < 10; i++)
-		if (func(largestring, "MZIRIBMZE", i) == strnstr(largestring, "MZIRIBMZE", i))
-			printf("%s%s%s", GREEN, " [OK] ", NC);
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		if (func(largestring, "MZIRIBMZE", -1) && !strcmp(func(largestring, "MZIRIBMZE", -1), strnstr(largestring, "MZIRIBMZE", -1))
+			&& func(largestring, "MZIRIBMZE", 7) == strnstr(largestring, "MZIRIBMZE", 7))
+			printf("%s%s%s", GREEN, "[OK]", NC);
 		else
-			printf("%s%s%s", RED, " [FAILED] ", NC);
-
-	char	buf[10];
-
-	bzero(buf, 10);
-	strcpy(buf, "un deux 9");
-	buf[9] = '6';
-	buf[1] = 0;
-	if(func(buf, "deux", 10) == strnstr(buf, "deux", 10))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
+		{
+			printf("%s%s%s", RED, "[FAILED]", NC);
+			add_error("[ERROR] - ft_strnstr :\nconst char largestring[] = \"MZIRIBMZIRIBMZE123\";\nft_strnstr(largestring, \"MZIRIBMZE\", -1) -> ", func(largestring, "MZIRIBMZE", -1));
+		}
+		exit(EXIT_SUCCESS);
+	}
 	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	printf("\n");
+	{
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - ft_strnstr :\nconst char largestring[] = \"MZIRIBMZIRIBMZE123\";\nft_strnstr(largestring, \"MZIRIBMZE\", -1);", NULL);
+		pid_b = fork();
+		if (pid_b == 0)
+		{
+			for (int i = 1; i < 10; i++)
+				if (func(largestring, "MZIRIBMZE", i) == strnstr(largestring, "MZIRIBMZE", i))
+					printf("%s%s%s", GREEN, " [OK] ", NC);
+				else
+				{
+					printf("%s%s%s", RED, " [FAILED] ", NC);
+					add_error("[ERROR] - ft_strnstr :\nconst char largestring[] = \"MZIRIBMZIRIBMZE123\";\nft_strnstr(largestring, \"MZIRIBMZE\", %d[1 - 9]) -> ", func(largestring, "MZIRIBMZE", i));
+				}
+			exit(EXIT_SUCCESS);
+		}
+		else
+		{
+			if (childpid_sig(pid_b))
+				add_error("[CRASH] - ft_strnstr :\nconst char largestring[] = \"MZIRIBMZIRIBMZE123\";\nft_strnstr(largestring, \"MZIRIBMZE\", %d[1 - 9]);", NULL);
+			pid_c = fork();
+			if (pid_c == 0)
+			{
+				char	buf[10];
+
+				bzero(buf, 10);
+				strcpy(buf, "un deux 9");
+				buf[9] = '6';
+				buf[1] = 0;
+				if(func(buf, "deux", 10) == strnstr(buf, "deux", 10))
+					printf("%s%s%s", GREEN, "[OK]", NC);
+				else
+				{
+					printf("%s%s%s", RED, "[FAILED]", NC);
+					add_error("[ERROR] - ft_strnstr :\nchar	buf[10] = \"un deux 9\";\nft_strnstr(buf, \"deux\", 10) -> ", func(buf, "deux", 10));
+				}
+				exit(EXIT_SUCCESS);			
+			}
+			else
+			{
+				if (childpid_sig(pid_c))
+					add_error("[CRASH] - ft_strnstr :\nchar	buf[10] = \"un deux 9\";\nft_strnstr(buf, \"deux\", 10);", NULL);
+				printf("\n");
+			}
+		}
+	}
 }
 
 static void	test_ft_strcmp(int (*func)(const char *, const char *))
@@ -980,32 +1688,111 @@ static void	test_ft_strcmp(int (*func)(const char *, const char *))
 	char	e[] = "hello";
 	char	f[] = "Hello Wolrd ";
 	char	g[] = "Hello Wolr\200";
+	pid_t	pid_a, pid_b, pid_c, pid_d, pid_e, pid_f;
 
-	if (func(a, b) == strcmp(a, b))
-		printf("%s%s%s", GREEN, "[OK] ", NC);
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		if (func(a, b) == strcmp(a, b))
+			printf("%s%s%s", GREEN, "[OK] ", NC);
+		else
+		{
+			printf("%s%s%s", RED, "[FAILED] ", NC);
+			add_error("[ERROR] - ft_strcmp : ft_strcmp(\"Hello World\", \"hello Wolrd\") -> ", q_itoa(func(a, b)));
+		}
+		exit(EXIT_SUCCESS);
+	}
 	else
-		printf("%s%s%s", RED, "[FAILED] ", NC);
-	if (func(a, c) == strcmp(a, c))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func(a, d) == strcmp(a, d))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func(a, e) == strcmp(a, e))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func(a, f) == strcmp(a, f))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func(a, g) == strcmp(a, g))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	printf("\n");
+	{
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - ft_strcmp : ft_strcmp(\"Hello World\", \"hello Wolrd\");", NULL);
+		pid_b = fork();
+		if (pid_b == 0)
+		{
+			if (func(a, c) == strcmp(a, c))
+				printf("%s%s%s", GREEN, " [OK] ", NC);
+			else
+			{
+				printf("%s%s%s", RED, " [FAILED] ", NC);
+				add_error("[ERROR] - ft_strcmp : ft_strcmp(\"Hello World\", \"Hello WolrD\") -> ", q_itoa(func(a, c)));
+			}
+			exit(EXIT_SUCCESS);
+		}
+		else
+		{
+			if (childpid_sig(pid_b))
+				add_error("[CRASH] - ft_strcmp : ft_strcmp(\"Hello World\", \"Hello WolrD\");", NULL);
+			pid_c = fork();
+			if (pid_c == 0)
+			{
+				if (func(a, d) == strcmp(a, d))
+					printf("%s%s%s", GREEN, " [OK] ", NC);
+				else
+				{
+					printf("%s%s%s", RED, " [FAILED] ", NC);
+					add_error("[ERROR] - ft_strcmp : ft_strcmp(\"Hello World\", \"Hello\") -> ", q_itoa(func(a, d)));
+				}
+				exit(EXIT_SUCCESS);			
+			}
+			else
+			{
+				if (childpid_sig(pid_c))
+					add_error("[CRASH] - ft_strcmp : ft_strcmp(\"Hello World\", \"Hello\");", NULL);
+				pid_d = fork();
+				if (pid_d == 0)
+				{
+					if (func(a, e) == strcmp(a, e))
+						printf("%s%s%s", GREEN, " [OK] ", NC);
+					else
+					{
+						printf("%s%s%s", RED, " [FAILED] ", NC);
+						add_error("[ERROR] - ft_strcmp : ft_strcmp(\"Hello World\", \"hello\") -> ", q_itoa(func(a, e)));
+					}
+					exit(EXIT_SUCCESS);	
+				}
+				else
+				{
+					if (childpid_sig(pid_d))
+						add_error("[CRASH] - ft_strcmp : ft_strcmp(\"Hello World\", \"hello\");", NULL);
+					pid_e = fork();
+					if (pid_e == 0)
+					{
+						if (func(a, f) == strcmp(a, f))
+							printf("%s%s%s", GREEN, " [OK] ", NC);
+						else
+						{
+							printf("%s%s%s", RED, " [FAILED] ", NC);
+							add_error("[ERROR] - ft_strcmp : ft_strcmp(\"Hello World\", \"Hello Wolrd \") -> ", q_itoa(func(a, f)));
+						}						
+						exit(EXIT_SUCCESS);
+					}
+					else
+					{
+						if (childpid_sig(pid_e))
+							add_error("[CRASH] - ft_strcmp : ft_strcmp(\"Hello World\", \"Hello Wolrd \");", NULL);
+						pid_f = fork();
+						if (pid_f == 0)
+						{
+							if (func(a, g) == strcmp(a, g))
+								printf("%s%s%s", GREEN, " [OK] ", NC);
+							else
+							{
+								printf("%s%s%s", RED, " [FAILED] ", NC);
+								add_error("[ERROR] - ft_strcmp : ft_strcmp(\"Hello World\", \"Hello Wolr\200\") -> ", q_itoa(func(a, g)));
+							}
+							exit(EXIT_SUCCESS);	
+						}
+						else
+						{
+							if (childpid_sig(pid_f))
+								add_error("[CRASH] - ft_strcmp(\"Hello World\", \"Hello Wolr\200\");", NULL);
+							printf("\n");
+						}
+					}					
+				}
+			}
+		}
+	}
 }
 
 static void	test_ft_strncmp(int (*func)(const char *, const char *, size_t))
@@ -1018,157 +1805,334 @@ static void	test_ft_strncmp(int (*func)(const char *, const char *, size_t))
 	char	f[] = "Hello Wolrd ";
 	char	g[] = "Hello Wolr\200";
 
-	if (func(a, b, sizeof(a)) == strncmp(a, b, sizeof(a)))
-		printf("%s%s%s", GREEN, "[OK] ", NC);
+	pid_t	pid_a, pid_b, pid_c, pid_d, pid_e, pid_f;
+
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		if (func(a, b, sizeof(a)) == strncmp(a, b, sizeof(a)))
+			printf("%s%s%s", GREEN, "[OK] ", NC);
+		else
+		{
+			printf("%s%s%s", RED, "[FAILED] ", NC);
+			add_error("[ERROR] - ft_strncmp : ft_strncmp(\"Hello World\", \"hello Wolrd\", 12) -> ", q_itoa(func(a, b, sizeof(a))));
+		}
+		exit(EXIT_SUCCESS);
+	}
 	else
-		printf("%s%s%s", RED, "[FAILED] ", NC);
-	if (func(a, c, 0) == strncmp(a, c, 0))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func(a, d, sizeof(a)) == strncmp(a, d, sizeof(a)))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func(a, e, sizeof(e)) == strncmp(a, e, sizeof(e)))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func(a, f, sizeof(f)) == strncmp(a, f, sizeof(f)))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func(a, g, sizeof(a)) == strncmp(a, g, sizeof(a)))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func(a, c, -1) == strncmp(a, c, -1))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func(a, c, 123456) == strncmp(a, c, 123456))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func(a, d, 5) == strncmp(a, d, 5))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	printf("\n");
+	{
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - ft_strncmp : ft_strncmp(\"Hello World\", \"hello Wolrd\", 12);", NULL);
+		pid_b = fork();
+		if (pid_b == 0)
+		{
+			if (func(a, c, 0) == strncmp(a, c, 0))
+				printf("%s%s%s", GREEN, " [OK] ", NC);
+			else
+			{
+				printf("%s%s%s", RED, " [FAILED] ", NC);
+				add_error("[ERROR] - ft_strncmp : ft_strncmp(\"Hello World\", \"Hello WolrD\", 0) -> ", q_itoa(func(a, c, 0)));
+			}
+			exit(EXIT_SUCCESS);
+		}
+		else
+		{
+			if (childpid_sig(pid_b))
+				add_error("[CRASH] - ft_strncmp : ft_strncmp(\"Hello World\", \"Hello WolrD\", 0);", NULL);
+			pid_c = fork();
+			if (pid_c == 0)
+			{
+				if (func(a, d, 12) == strncmp(a, d, 12))
+					printf("%s%s%s", GREEN, " [OK] ", NC);
+				else
+				{
+					printf("%s%s%s", RED, " [FAILED] ", NC);
+					add_error("[ERROR] - ft_strncmp : ft_strncmp(\"Hello World\", \"Hello\", 12) -> ", q_itoa(func(a, d, 12)));
+				}
+				exit(EXIT_SUCCESS);			
+			}
+			else
+			{
+				if (childpid_sig(pid_c))
+					add_error("[CRASH] - ft_strncmp : ft_strncmp(\"Hello World\", \"Hello\", 12);", NULL);
+				pid_d = fork();
+				if (pid_d == 0)
+				{
+					if (func(a, e, 6) == strncmp(a, e, 6))
+						printf("%s%s%s", GREEN, " [OK] ", NC);
+					else
+					{
+						printf("%s%s%s", RED, " [FAILED] ", NC);
+						add_error("[ERROR] - ft_strncmp : ft_strncmp(\"Hello World\", \"hello\", 6) -> ", q_itoa(func(a, e, 6)));
+					}
+					exit(EXIT_SUCCESS);	
+				}
+				else
+				{
+					if (childpid_sig(pid_d))
+						add_error("[CRASH] - ft_strncmp : ft_strncmp(\"Hello World\", \"hello\", 6);", NULL);
+					pid_e = fork();
+					if (pid_e == 0)
+					{
+						if (func(a, f, 13) == strncmp(a, f, 13))
+							printf("%s%s%s", GREEN, " [OK] ", NC);
+						else
+						{
+							printf("%s%s%s", RED, " [FAILED] ", NC);
+							add_error("[ERROR] - ft_strncmp : ft_strncmp(\"Hello World\", \"Hello Wolrd \", 13) -> ", q_itoa(func(a, f, 13)));
+						}						
+						exit(EXIT_SUCCESS);
+					}
+					else
+					{
+						if (childpid_sig(pid_e))
+							add_error("[CRASH] - ft_strncmp : ft_strncmp(\"Hello World\", \"Hello Wolrd \", 13);", NULL);
+						pid_f = fork();
+						if (pid_f == 0)
+						{
+							if (func(a, c, -1) == strncmp(a, c, -1))
+								printf("%s%s%s", GREEN, " [OK] ", NC);
+							else
+							{
+								printf("%s%s%s", RED, " [FAILED] ", NC);
+								add_error("[ERROR] - ft_strncmp : ft_strncmp(\"Hello World\", \"Hello WolrD\", -1) -> ", q_itoa(func(a, c, -1)));
+							}
+							exit(EXIT_SUCCESS);	
+						}
+						else
+						{
+							if (childpid_sig(pid_f))
+								add_error("[CRASH] - ft_strncmp : ft_strncmp(\"Hello World\", \"Hello WolrD\", -1);", NULL);
+							printf("\n");
+						}
+					}					
+				}
+			}
+		}
+	}
 }
 
 static void	test_ft_atoi(int (*func)(const char *))
 {
-	if (func("   1425") == atoi("   1425"))
-		printf("%s%s%s", GREEN, "[OK] ", NC);
-	else
-		printf("%s%s%s", RED, "[FAILED] ", NC);
-	if (func("12s1425") == atoi("12s1425"))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func("s1425") == atoi("s1425"))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func("     \t1425sad213") == atoi("     \t1425sad213"))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func("2147483647") == atoi("2147483647"))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func("-2147483648") == atoi("-2147483648"))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func("+2147483648") == atoi("+2147483648"))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func("9223372036854775807") == atoi("9223372036854775807"))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func("9223372036854775808") == atoi("9223372036854775808"))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func("922337203685477580712125325543357343463643464634633466344366323523959359238")
-		== atoi("922337203685477580712125325543357343463643464634633466344366323523959359238"))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func("-922337203685477580712125325543357343463643464634633466344366323523959359238")
-		== atoi("-922337203685477580712125325543357343463643464634633466344366323523959359238"))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	printf("\n");
-}
+	pid_t	pid_a, pid_b, pid_c, pid_d, pid_e, pid_f, pid_g, pid_h, pid_l, pid_m, pid_n;
 
-static void	test_ft_isalpha(int (*func)(char))
-{
-	if (func('\108') == isalpha('\108'))
-		printf("%s%s%s", GREEN, "[OK] ", NC);
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		if (func("   1425") == atoi("   1425"))
+			printf("%s%s%s", GREEN, "[OK] ", NC);
+		else
+		{
+			printf("%s%s%s", RED, "[FAILED] ", NC);
+			add_error("[ERROR] - ft_atoi : ft_atoi(\"   1425\") -> ", q_itoa(func("   1425")));
+		}
+		exit(EXIT_SUCCESS);
+	}
 	else
-		printf("%s%s%s", RED, "[FAILED] ", NC);
-	if (func('\148') == isalpha('\148'))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func(12) == isalpha(12))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func('\200') == isalpha('\200'))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func(0) == isalpha(0))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func('\101') == isalpha('\101'))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	printf("\n");
-}
-
-static void	test_ft_isdigit(int (*func)(char))
-{
-	if (func('1') == isdigit('1'))
-		printf("%s%s%s", GREEN, "[OK] ", NC);
-	else
-		printf("%s%s%s", RED, "[FAILED] ", NC);
-	if (func('4') == isdigit('4'))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func('\200') == isdigit('\200'))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (func('A') == isdigit('A'))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	printf("\n");
+	{
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - ft_atoi : ft_atoi(\"   1425\");", NULL);
+		pid_b = fork();
+		if (pid_b == 0)
+		{
+			if (func("12s1425") == atoi("12s1425"))
+				printf("%s%s%s", GREEN, " [OK] ", NC);
+			else
+			{
+				printf("%s%s%s", RED, " [FAILED] ", NC);
+				add_error("[ERROR] - ft_atoi : ft_atoi(\"12s1425\") -> ", q_itoa(func("12s1425")));
+			}
+			exit(EXIT_SUCCESS);
+		}
+		else
+		{
+			if (childpid_sig(pid_b))
+				add_error("[CRASH] - ft_atoi : ft_atoi(\"12s1425\");", NULL);
+			pid_c = fork();
+			if (pid_c == 0)
+			{
+				if (func("") == atoi(""))
+					printf("%s%s%s", GREEN, " [OK] ", NC);
+				else
+				{
+					printf("%s%s%s", RED, " [FAILED] ", NC);
+					add_error("[ERROR] - ft_atoi : ft_atoi(\"\") -> ", q_itoa(func("")));
+				}
+				exit(EXIT_SUCCESS);			
+			}
+			else
+			{
+				if (childpid_sig(pid_c))
+					add_error("[CRASH] - ft_atoi : ft_atoi(\"\");", NULL);
+				pid_d = fork();
+				if (pid_d == 0)
+				{
+					if (func("     \t1425sad213") == atoi("     \t1425sad213"))
+						printf("%s%s%s", GREEN, " [OK] ", NC);
+					else
+					{
+						printf("%s%s%s", RED, " [FAILED] ", NC);
+						add_error("[ERROR] - ft_atoi : ft_atoi(\"     \t1425sad213\") -> ", q_itoa(func("     \t1425sad213")));
+					}
+					exit(EXIT_SUCCESS);	
+				}
+				else
+				{
+					if (childpid_sig(pid_d))
+						add_error("[CRASH] - ft_atoi : ft_atoi(\"     \t1425sad213\");", NULL);
+					pid_e = fork();
+					if (pid_e == 0)
+					{
+						if (func(" 2147483647 ") == atoi(" 2147483647 "))
+							printf("%s%s%s", GREEN, " [OK] ", NC);
+						else
+						{
+							printf("%s%s%s", RED, " [FAILED] ", NC);
+							add_error("[ERROR] - ft_atoi : ft_atoi(\" 2147483647 \") -> ", q_itoa(func(" 2147483647 ")));
+						}
+						exit(EXIT_SUCCESS);
+					}
+					else
+					{
+						if (childpid_sig(pid_e))
+							add_error("[CRASH] - ft_atoi : ft_atoi(\" 2147483647 \");", NULL);
+						pid_f = fork();
+						if (pid_f == 0)
+						{
+							if (func("-2147483648") == atoi("-2147483648"))
+								printf("%s%s%s", GREEN, " [OK] ", NC);
+							else
+							{
+								printf("%s%s%s", RED, " [FAILED] ", NC);
+								add_error("[ERROR] - ft_atoi : ft_atoi(\"-2147483648\") -> ", q_itoa(func("-2147483648")));
+							}
+							exit(EXIT_SUCCESS);	
+						}
+						else
+						{
+							if (childpid_sig(pid_f))
+								add_error("[CRASH] - ft_atoi : ft_atoi(\"-2147483648\");", NULL);
+							pid_g = fork();
+							if (pid_g == 0)
+							{
+								if (func("+2147483648") == atoi("+2147483648"))
+									printf("%s%s%s", GREEN, " [OK] ", NC);
+								else
+								{
+									printf("%s%s%s", RED, " [FAILED] ", NC);
+									add_error("[ERROR] - ft_atoi : ft_atoi(\"+2147483648\") -> ", q_itoa(func("+2147483648")));
+								}
+								exit(EXIT_SUCCESS);
+							}
+							else
+							{
+								if (childpid_sig(pid_g))
+									add_error("[CRASH] - ft_atoi : ft_atoi(\"+2147483648\");", NULL);
+								pid_h = fork();
+								if (pid_h == 0)
+								{
+									if (func("9223372036854775807") == atoi("9223372036854775807"))
+										printf("%s%s%s", GREEN, " [OK] ", NC);
+									else
+									{
+										printf("%s%s%s", RED, " [FAILED] ", NC);
+										add_error("[ERROR] - ft_atoi : ft_atoi(\"9223372036854775807\") -> ", q_itoa(func("9223372036854775807")));
+									}
+									exit(EXIT_SUCCESS);
+								}
+								else
+								{
+									if (childpid_sig(pid_h))
+										add_error("[CRASH] - ft_atoi : ft_atoi(\"9223372036854775807\");", NULL);
+									pid_l = fork();
+									if (pid_l == 0)
+									{
+										if (func("9223372036854775808") == atoi("9223372036854775808"))
+											printf("%s%s%s", GREEN, " [OK] ", NC);
+										else
+										{
+											printf("%s%s%s", RED, " [FAILED] ", NC);
+											add_error("[ERROR] - ft_atoi : ft_atoi(\"9223372036854775808\") -> ", q_itoa(func("9223372036854775808")));
+										}
+										exit(EXIT_SUCCESS);
+									}
+									else
+									{
+										if (childpid_sig(pid_l))
+											add_error("[CRASH] - ft_atoi : ft_atoi(\"9223372036854775808\");", NULL);
+										pid_m = fork();
+										if (pid_m == 0)
+										{
+											if (func("922337203685477580712125325543357343463643464634633466344366323523959359238")
+												== atoi("922337203685477580712125325543357343463643464634633466344366323523959359238"))
+												printf("%s%s%s", GREEN, " [OK] ", NC);
+											else
+											{
+												printf("%s%s%s", RED, " [FAILED] ", NC);
+												add_error("[ERROR] - ft_atoi : ft_atoi(\"922337203685477580712125325543357343463643464634633466344366323523959359238\") -> ", q_itoa(func("922337203685477580712125325543357343463643464634633466344366323523959359238")));
+											}
+											exit(EXIT_SUCCESS);
+										}
+										else
+										{
+											if (childpid_sig(pid_m))
+												add_error("[CRASH] - ft_atoi : ft_atoi(\"922337203685477580712125325543357343463643464634633466344366323523959359238\");", NULL);
+											pid_n = fork();
+											if (pid_n == 0)
+											{
+												if (func("-922337203685477580712125325543357343463643464634633466344366323523959359238")
+													== atoi("-922337203685477580712125325543357343463643464634633466344366323523959359238"))
+													printf("%s%s%s", GREEN, " [OK] ", NC);
+												else
+												{
+													printf("%s%s%s", RED, " [FAILED] ", NC);
+													add_error("[ERROR] - ft_atoi : ft_atoi(\"-922337203685477580712125325543357343463643464634633466344366323523959359238\") -> ", q_itoa(func("-922337203685477580712125325543357343463643464634633466344366323523959359238")));
+												}
+												exit(EXIT_SUCCESS);
+											}
+											else
+											{
+												if (childpid_sig(pid_n))
+													add_error("[CRASH] - ft_atoi : ft_atoi(\"-922337203685477580712125325543357343463643464634633466344366323523959359238\");", NULL);
+												printf("\n");
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 static void	test_ft_strnew()
 {
 	char	a[] = "\0\0\0\0\0";
 	char	*ft_a;
+	pid_t pid_a;
 
-	ft_a = ft_strnew(5);
-	if (!strncmp(a, ft_a, sizeof(a)))
-		printf("%s%s%s", GREEN, "[OK] ", NC);
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		ft_a = ft_strnew(5);
+		if (!strncmp(a, ft_a, sizeof(a)))
+			printf("%s%s%s", GREEN, "[OK] ", NC);
+		else
+		{
+			printf("%s%s%s", RED, "[FAILED] ", NC);
+			add_error("[ERROR] - ft_strnew : ft_strnew(5) -> %s - ", mem_replace(ft_strnew(5), 0, '0', 4));
+		}
+		exit(EXIT_SUCCESS);
+	}
 	else
-		printf("%s%s%s", RED, "[FAILED] ", NC);
-	printf("\n");
+	{
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - ft_strnew : ft_strnew(5);", NULL);
+		printf("\n");
+	}
 }
 
 static void	test_ft_strjoin()
@@ -1177,20 +2141,44 @@ static void	test_ft_strjoin()
 	char	s2[] = "malloc ???";
 	char	s3[] = "where is my malloc ???";
 	char	*p_s;
+	pid_t pid_a, pid_b;
 
-	p_s = ft_strjoin(s1, s2);
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		p_s = ft_strjoin(s1, s2);
 
-	if (p_s && !strcmp(s1, "where is my ") && !strcmp(p_s, s3))
-		printf("%s%s%s", GREEN, "[OK] ", NC);
+		if (p_s && !strcmp(s1, "where is my ") && !strcmp(p_s, s3))
+			printf("%s%s%s", GREEN, "[OK] ", NC);
+		else
+		{
+			printf("%s%s%s", RED, "[FAILED] ", NC);
+			add_error("[ERROR] - ft_strjoin :\nchar	s1[] = \"where is my \";\nchar	s2[] = \"malloc ???\";\nft_strjoin(s1, s2) -> ", p_s);
+		}
+		exit(EXIT_SUCCESS);
+	}
 	else
-		printf("%s%s%s", RED, "[FAILED] ", NC);
-	ft_strjoin(NULL, s2);
-	printf("%s%s%s", GREEN, " [OK] ", NC);
-	ft_strjoin(s1, NULL);
-	printf("%s%s%s", GREEN, " [OK] ", NC);
-	ft_strjoin(NULL, NULL);
-	printf("%s%s%s", GREEN, " [OK] ", NC);
-	printf("\n");
+	{
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - ft_strjoin :\nchar	s1[] = \"where is my \";\nchar	s2[] = \"malloc ???\";\nft_strjoin(s1, s2);", NULL);
+		pid_b = fork();
+		if (pid_b == 0)
+		{
+			ft_strjoin(NULL, s2);
+			printf("%s%s%s", GREEN, " [OK] ", NC);
+			ft_strjoin(s1, NULL);
+			printf("%s%s%s", GREEN, " [OK] ", NC);
+			ft_strjoin(NULL, NULL);
+			printf("%s%s%s", GREEN, " [OK] ", NC);
+			exit(EXIT_SUCCESS);
+		}
+		else
+		{
+			if (childpid_sig(pid_b))
+				add_error("[CRASH] - ft_strjoin : Not Protected for NULL data entry!", NULL);
+			printf("\n");		
+		}
+	}
 }
 
 static void	test_ft_strtrim()
@@ -1200,61 +2188,170 @@ static void	test_ft_strtrim()
 	char *s3;
 	int r_size = strlen(s2);
 	int size;
+	pid_t pid_a;
 
-	s3 = ft_strtrim(s1);
-	if (!memcmp(s2, s3, r_size + 1))
-		printf("%s%s%s", GREEN, "[OK] ", NC);
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		s3 = ft_strtrim(s1);
+		if (!memcmp(s2, s3, r_size + 1))
+			printf("%s%s%s", GREEN, "[OK] ", NC);
+		else
+		{
+			printf("%s%s%s", RED, "[FAILED] ", NC);
+			add_error("[ERROR] - ft_strtrim : ft_strtrim(\"\t   \n\n\n  \n\n\t    Hello \t  Please\n Trim me !\t\t\t\n  \t\t\t\t  \") -> ", s3);
+		}
+		exit(EXIT_SUCCESS);
+	}
 	else
-		printf("%s%s%s", RED, "[FAILED] ", NC);
-	printf("\n");
+	{
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - ft_strtrim : ft_strtrim(\"\t   \n\n\n  \n\n\t    Hello \t  Please\n Trim me !\t\t\t\n  \t\t\t\t  \");", NULL);
+		printf("\n");
+	}
 }
 
 static void	test_ft_strsplit()
 {
 	char	test[3][6] = { {'H', 'e', 'l', 'l', 'o', 0}, {'W', 'o', 'r', 'l', 'd', 0}, 0};
 	char	**ft_test;
+	pid_t pid_a;
 
-	ft_test = ft_strsplit("((((((((((((Hello((((((((((((((((((((((((((World((((((((((((((((((((", '(');
-	for (int i = 0; i < 2; i++)
-		if (strcmp(ft_test[i], test[i]))
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		ft_test = ft_strsplit("((((((((((((Hello((((((((((((((((((((((((((World((((((((((((((((((((", '(');
+		for (int i = 0; i < 2; i++)
+			if (strcmp(ft_test[i], test[i]))
+			{
+				printf("%s%s%s", RED, " [FAILED] ", NC);
+				add_error("[ERROR] - ft_strsplit : ft_strsplit(\"((((((((((((Hello((((((((((((((((((((((((((World((((((((((((((((((((\", '(')", NULL);
+				exit(EXIT_SUCCESS);
+			}
+		if ((int)ft_test[2] == 0)
+			printf("%s%s%s", GREEN, "[OK] ", NC);
+		else
 		{
-			printf("%s%s%s", RED, " [FAILED] ", NC);
-			return ;
+			printf("%s%s%s", RED, "[FAILED] ", NC);
+			add_error("[ERROR] - ft_strsplit : ft_strsplit(\"((((((((((((Hello((((((((((((((((((((((((((World((((((((((((((((((((\", '(')", NULL);
 		}
-	if ((int)ft_test[2] == 0)
-		printf("%s%s%s", GREEN, "[OK] ", NC);
+		exit(EXIT_SUCCESS);
+	}
 	else
-		printf("%s%s%s", RED, "[FAILED] ", NC);
-	printf("\n");
+	{
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - ft_strsplit : Not NULL terminated list of words or BAD OUTPUT", NULL);
+		printf("\n");
+	}
 }
 
 static void	test_ft_itoa()
 {
-	if (!strcmp(ft_itoa(123), "123"))
-		printf("%s%s%s", GREEN, "[OK] ", NC);
+	pid_t	pid_a, pid_b, pid_c, pid_d, pid_e, pid_f;
+
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		if (!strcmp(ft_itoa(123), "123"))
+			printf("%s%s%s", GREEN, "[OK] ", NC);
+		else
+		{
+			printf("%s%s%s", RED, "[FAILED] ", NC);
+			add_error("[ERROR] - ft_itoa : ft_itoa(123) -> ", ft_itoa(123));
+		}
+		exit(EXIT_SUCCESS);
+	}
 	else
-		printf("%s%s%s", RED, "[FAILED] ", NC);
-	if (!strcmp(ft_itoa(2147483647), "2147483647"))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (!strcmp(ft_itoa(-2), "-2"))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (!strcmp(ft_itoa(-2147483648), "-2147483648"))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (!strcmp(ft_itoa(0), "0"))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	if (!strcmp(ft_itoa(489652), "489652"))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	printf("\n");
+	{
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - ft_itoa : ft_itoa(123);", NULL);
+		pid_b = fork();
+		if (pid_b == 0)
+		{
+			if (!strcmp(ft_itoa(2147483647), "2147483647"))
+				printf("%s%s%s", GREEN, " [OK] ", NC);
+			else
+			{
+				printf("%s%s%s", RED, " [FAILED] ", NC);
+				add_error("[ERROR] - ft_itoa : ft_itoa(2147483647) -> ", ft_itoa(2147483647));
+			}
+			exit(EXIT_SUCCESS);
+		}
+		else
+		{
+			if (childpid_sig(pid_b))
+				add_error("[CRASH] - ft_itoa : ft_itoa(2147483647);", NULL);
+			pid_c = fork();
+			if (pid_c == 0)
+			{
+				if (!strcmp(ft_itoa(-2), "-2"))
+					printf("%s%s%s", GREEN, " [OK] ", NC);
+				else
+				{
+					printf("%s%s%s", RED, " [FAILED] ", NC);
+					add_error("[ERROR] - ft_itoa : ft_itoa(-2) -> ", ft_itoa(-2));
+				}
+				exit(EXIT_SUCCESS);			
+			}
+			else
+			{
+				if (childpid_sig(pid_c))
+					add_error("[CRASH] - ft_itoa : ft_itoa(-2);", NULL);
+				pid_d = fork();
+				if (pid_d == 0)
+				{
+					if (!strcmp(ft_itoa(-2147483648), "-2147483648"))
+						printf("%s%s%s", GREEN, " [OK] ", NC);
+					else
+					{
+						printf("%s%s%s", RED, " [FAILED] ", NC);
+						add_error("[ERROR] - ft_itoa : ft_itoa(-2147483648) -> ", ft_itoa(-2147483648));
+					}
+					exit(EXIT_SUCCESS);	
+				}
+				else
+				{
+					if (childpid_sig(pid_d))
+						add_error("[CRASH] - ft_itoa : ft_itoa(-2147483648);", NULL);
+					pid_e = fork();
+					if (pid_e == 0)
+					{
+						if (!strcmp(ft_itoa(0), "0"))
+							printf("%s%s%s", GREEN, " [OK] ", NC);
+						else
+						{
+							printf("%s%s%s", RED, " [FAILED] ", NC);
+							add_error("[ERROR] - ft_itoa : ft_itoa(0) -> ", ft_itoa(0));
+						}
+						exit(EXIT_SUCCESS);
+					}
+					else
+					{
+						if (childpid_sig(pid_e))
+							add_error("[CRASH] - ft_itoa : ft_itoa(0);", NULL);
+						pid_f = fork();
+						if (pid_f == 0)
+						{
+							if (!strcmp(ft_itoa(489652), "489652"))
+								printf("%s%s%s", GREEN, " [OK] ", NC);
+							else
+							{
+								printf("%s%s%s", RED, " [FAILED] ", NC);
+								add_error("[ERROR] - ft_itoa : ft_itoa(489652) -> ", ft_itoa(489652));
+							}
+							exit(EXIT_SUCCESS);	
+						}
+						else
+						{
+							if (childpid_sig(pid_f))
+								add_error("[CRASH] - ft_itoa : ft_itoa(489652);", NULL);
+							printf("\n");
+						}
+					}					
+				}
+			}
+		}
+	}
 }
 
 int		main(void)
@@ -1390,18 +2487,6 @@ int		main(void)
 	test_ft_atoi(atoi);
 	printf("\tResults from FT_ATOI (YOURS) below:\n\t");
 	test_ft_atoi(ft_atoi);
-
-	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_isalpha\n", NC);
-	printf("\tResults from ISALPHA (STRING.H) below:\n\t");
-	test_ft_isalpha(isalpha);
-	printf("\tResults from FT_ISALPHA (YOURS) below:\n\t");
-	test_ft_isalpha(ft_isalpha);
-
-	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_isdigit\n", NC);
-	printf("\tResults from ISDIGIT (STRING.H) below:\n\t");
-	test_ft_isdigit(isdigit);
-	printf("\tResults from FT_ISDIGIT (YOURS) below:\n\t");
-	test_ft_isdigit(ft_isdigit);
 
 	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_strnew\n\t", NC);
 	test_ft_strnew();
