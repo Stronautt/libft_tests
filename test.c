@@ -6,7 +6,7 @@
 /*   By: pgritsen <pgritsen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/25 18:07:22 by pgritsen          #+#    #+#             */
-/*   Updated: 2017/11/07 12:31:23 by pgritsen         ###   ########.fr       */
+/*   Updated: 2017/11/07 13:21:52 by pgritsen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,10 +33,10 @@ char	NC[] = "\033[0m",
 		YELLOW[] = "\033[33m",
 		LCYAN[] = "\033[96m";
 
-char	ERRORS[MB_SIZE];
+char	ERRORS[2 * MB_SIZE];
 
 static void	add_error(char	*s1, char	*s2)
-{	
+{
 	strlcat(ERRORS, s1, sizeof(ERRORS));
 	if (s2)
 		strlcat(ERRORS, s2, sizeof(ERRORS));
@@ -199,7 +199,7 @@ static void	test_ft_putendl(void)
 	else
 	{
 		if (childpid_sig(pid_a))
-			add_error("[CRASH] - ft_putendl : ft_putendl(\"i'm putendl\")", NULL);
+			add_error("[CRASH] - ft_putendl : ft_putendl(\"i'm putendl\");", NULL);
 		pid_b = fork();
 		if (pid_b == 0)
 		{
@@ -209,7 +209,7 @@ static void	test_ft_putendl(void)
 		}
 		else
 			if (childpid_sig(pid_b))
-				add_error("[CRASH] - ft_putendl : ft_putendl(NULL)", NULL);
+				add_error("[CRASH] - ft_putendl : ft_putendl(NULL);", NULL);
 	}
 	printf("\n\n");
 }
@@ -235,7 +235,8 @@ static void test_ft_memset(void *(*func)(void *, int, size_t))
 			printf("%s%s%s", GREEN, "[OK] ", NC);
 		else
 		{
-			add_error("[ERROR] - ft_memset : ft_memset(ft_s1, '\0', 4) -> ft_s1 : ", mem_replace(ft_s1, '\0', '0', sizeof(ft_s1) - 1));
+			add_error("[ERROR] - ft_memset :\nchar ft_s1[] = \"Hello World!\";\nft_memset(ft_s1, '\0', 4) -> ft_s1 : ",
+				mem_replace(ft_s1, '\0', '0', sizeof(ft_s1) - 1));
 			printf("%s%s%s", RED, "[FAILED] ", NC);
 		}
 		exit(EXIT_SUCCESS);
@@ -243,7 +244,7 @@ static void test_ft_memset(void *(*func)(void *, int, size_t))
 	else
 	{
 		if (childpid_sig(pid_a))
-			add_error("[CRASH] - ft_memset : ft_memset(ft_s1, '\0', 4) -> ft_s1 : ", mem_replace(ft_s1, '\0', '0', sizeof(ft_s1) - 1));;
+			add_error("[CRASH] - ft_memset :\nchar ft_s1[] = \"Hello World!\";\nft_memset(ft_s1, '\0', 4);", NULL);
 		pid_b = fork();
 		if (pid_b == 0)
 		{
@@ -252,26 +253,34 @@ static void test_ft_memset(void *(*func)(void *, int, size_t))
 			if (s2 && ft_s2 && !memcmp(s2, ft_s2, sizeof(s2)))
 				printf("%s%s%s", GREEN, " [OK] ", NC);
 			else
+			{
+				add_error("[ERROR] - ft_memset :\nchar ft_s2[] = \"Hello World!\";\nft_memset(ft_s2, '\200', 0) -> ft_s2 : ", ft_s2);
 				printf("%s%s%s", RED, " [FAILED] ", NC);
+			}
 			exit(EXIT_SUCCESS);
 		}
 		else
 		{
-			childpid_sig(pid_b);
+			if (childpid_sig(pid_b))
+				add_error("[CRASH] - ft_memset :\nchar ft_s2[] = \"Hello World!\";\nft_memset(ft_s2, '\200', 0);", NULL);
 			pid_c = fork();
 			if (pid_c == 0)
 			{
 				memset(s3, 'O', sizeof(s3));
 				func(ft_s3, 'O', sizeof(ft_s3));
-				if (!memcmp(s3, ft_s3, sizeof(s3)))
+				if (s3 && ft_s3 && !memcmp(s3, ft_s3, sizeof(s3)))
 					printf("%s%s%s", GREEN, " [OK] ", NC);
 				else
+				{
+					add_error("[ERROR] - ft_memset :\nchar ft_s3[] = \"Hello World!\";\nft_memset(ft_s3, 'O', sizeof(ft_s3)) -> ft_s3 : ", ft_s3);
 					printf("%s%s%s", RED, " [FAILED] ", NC);
+				}
 				exit(EXIT_SUCCESS);
 			}
 			else
 			{
-				childpid_sig(pid_c);
+				if (childpid_sig(pid_c))
+					add_error("[CRASH] - ft_memset :\nchar ft_s3[] = \"Hello World!\";\nft_memset(ft_s3, 'O', sizeof(ft_s3));", NULL);
 				pid_d = fork();
 				if (pid_d == 0)
 				{
@@ -280,12 +289,16 @@ static void test_ft_memset(void *(*func)(void *, int, size_t))
 					if (!memcmp(s4, ft_s4, sizeof(s4)))
 						printf("%s%s%s", GREEN, " [OK] ", NC);
 					else
+					{
+						add_error("[ERROR] - ft_memset :\nchar ft_s4[] = \"Hello World!\";\nft_memset(ft_s4, '-', 1) -> ft_s4 : ", ft_s4);
 						printf("%s%s%s", RED, " [FAILED] ", NC);
+					}
 					exit(EXIT_SUCCESS);
 				}
 				else
 				{
-					childpid_sig(pid_d);
+					if (childpid_sig(pid_d))
+						add_error("[CRASH] - ft_memset :\nchar ft_s4[] = \"Hello World!\";\nft_memset(ft_s4, '-', 1);", NULL);
 					printf("\n");
 				}
 			}
@@ -303,35 +316,89 @@ static void test_ft_bzero(void *(*func)(void *, size_t))
 	char	ft_s2[] = "Hello World!";
 	char	ft_s3[] = "Hello World!";
 	char	ft_s4[] = "Hello World!";
+	pid_t pid_a, pid_b, pid_c, pid_d;
 
-	bzero(s1, 4);
-	func(ft_s1, 4);
-	if (!memcmp(s1, ft_s1, sizeof(s1)))
-		printf("%s%s%s", GREEN, "[OK] ", NC);
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		bzero(s1, 4);
+		func(ft_s1, 4);
+		if (!memcmp(s1, ft_s1, sizeof(s1)))
+			printf("%s%s%s", GREEN, "[OK] ", NC);
+		else
+		{
+			printf("%s%s%s", RED, "[FAILED] ", NC);
+			add_error("[ERROR] - ft_bzero :\nchar ft_s1[] = \"Hello World!\";\nft_bzero(ft_s1, 4) -> ft_s1 : ",
+				mem_replace(ft_s1, 0, '0', sizeof(ft_s1) - 1));
+		}
+		exit(EXIT_SUCCESS);
+	}
 	else
-		printf("%s%s%s", RED, "[FAILED] ", NC);
-
-	bzero(s2, 0);
-	func(ft_s2, 0);
-	if (!memcmp(s2, ft_s2, sizeof(s2)))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-
-	bzero(s3, sizeof(s3));
-	func(ft_s3, sizeof(ft_s3));
-	if (!memcmp(s3, ft_s3, sizeof(s3)))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-
-	bzero(s4, 1);
-	func(ft_s4, 1);
-	if (!memcmp(s4, ft_s4, sizeof(s4)))
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	printf("\n");
+	{
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - ft_bzero :\nchar ft_s1[] = \"Hello World!\";\nft_bzero(ft_s1, 4);", NULL);
+		pid_b = fork();
+		if (pid_b == 0)
+		{
+			bzero(s2, 0);
+			func(ft_s2, 0);
+			if (!memcmp(s2, ft_s2, sizeof(s2)))
+				printf("%s%s%s", GREEN, " [OK] ", NC);
+			else
+			{
+				printf("%s%s%s", RED, " [FAILED] ", NC);
+				add_error("[ERROR] - ft_bzero :\nchar ft_s2[] = \"Hello World!\";\nft_bzero(ft_s2, 0) -> ft_s2 : ",
+					mem_replace(ft_s2, 0, '0', sizeof(ft_s2) - 1));
+			}
+			exit(EXIT_SUCCESS);
+		}
+		else
+		{
+			if (childpid_sig(pid_b))
+				add_error("[CRASH] - ft_bzero :\nchar ft_s2[] = \"Hello World!\";\nft_bzero(ft_s2, 0);", NULL);
+			pid_c = fork();
+			if (pid_c == 0)
+			{				
+				bzero(s3, sizeof(s3));
+				func(ft_s3, sizeof(ft_s3));
+				if (!memcmp(s3, ft_s3, sizeof(s3)))
+					printf("%s%s%s", GREEN, " [OK] ", NC);
+				else
+				{
+					printf("%s%s%s", RED, " [FAILED] ", NC);
+					add_error("[ERROR] - ft_bzero :\nchar ft_s3[] = \"Hello World!\";\nft_bzero(ft_s3, sizeof(ft_s3)) -> ft_s3 : ",
+						mem_replace(ft_s3, 0, '0', sizeof(ft_s3) - 1));
+				}
+				exit(EXIT_SUCCESS);
+			}
+			else
+			{
+				if (childpid_sig(pid_c))
+					add_error("[CRASH] - ft_bzero :\nchar ft_s3[] = \"Hello World!\";\nft_bzero(ft_s3, sizeof(ft_s3));", NULL);
+				pid_d = fork();
+				if (pid_d == 0)
+				{
+					bzero(s4, 1);
+					func(ft_s4, 1);
+					if (!memcmp(s4, ft_s4, sizeof(s4)))
+						printf("%s%s%s", GREEN, " [OK] ", NC);
+					else
+					{
+						printf("%s%s%s", RED, " [FAILED] ", NC);
+						add_error("[ERROR] - ft_bzero :\nchar ft_s4[] = \"Hello World!\";\nft_bzero(ft_s4, 1) -> ft_s4 : ",
+							mem_replace(ft_s4, 0, '0', sizeof(ft_s4) - 1));
+					}
+					exit(EXIT_SUCCESS);
+				}
+				else
+				{
+					if (childpid_sig(pid_d))
+						add_error("[CRASH] - ft_bzero :\nchar ft_s4[] = \"Hello World!\";\nft_bzero(ft_s4, 1);", NULL);
+					printf("\n");
+				}
+			}
+		}
+	}
 }
 
 static struct	ft_memcpy{
@@ -341,29 +408,58 @@ static struct	ft_memcpy{
 
 static void	test_ft_memcpy(void *(*func)(void *, const void *, size_t))
 {
-	char name[] = "Pavel G.";
+	pid_t	pid_a, pid_b;
 
-	func(ft_person.name, name, strlen(name) + 1);
-	ft_person.age = 42;
+	pid_a = fork();
+	if (pid_a == 0)
+	{
+		char name[] = "Pavel G.";
 
-	memcpy(person.name, name, strlen(name) + 1);
-	person.age = 42;
+		func(ft_person.name, name, strlen(name) + 1);
+		ft_person.age = 42;
 
-	if (!strcmp(ft_person.name, person.name))
-		printf("%s%s%s", GREEN, "[OK] ", NC);
+		memcpy(person.name, name, strlen(name) + 1);
+		person.age = 42;
+
+		if (!strcmp(ft_person.name, person.name))
+			printf("%s%s%s", GREEN, "[OK] ", NC);
+		else
+		{
+			printf("%s%s%s", RED, " [FAILED] ", NC);
+			add_error("[ERROR] - ft_memcpy :\nchar name[] = \"Pavel G.\";\nft_memcpy(ft_person.name, name, strlen(name) + 1) -> ft_person.name : ",
+				ft_person.name);
+		}
+		exit(EXIT_SUCCESS);
+	}
 	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
+	{
+		if (childpid_sig(pid_a))
+			add_error("[CRASH] - ft_memcpy :\nchar name[] = \"Pavel G.\";\nft_memcpy(ft_person.name, name, strlen(name) + 1);", NULL);
+		pid_b = fork();
+		if (pid_b == 0)
+		{
+			func(&ft_person, &ft_person_copy, sizeof(ft_person));
 
-	func(&ft_person, &ft_person_copy, sizeof(ft_person));
+			memcpy(&person, &person_copy, sizeof(person));
 
-	memcpy(&person, &person_copy, sizeof(person));
-
-	if (!strcmp(ft_person_copy.name, person_copy.name)
-		&& ft_person_copy.age == person_copy.age)
-		printf("%s%s%s", GREEN, " [OK] ", NC);
-	else
-		printf("%s%s%s", RED, " [FAILED] ", NC);
-	printf("\n");
+			if (!strcmp(ft_person_copy.name, person_copy.name)
+				&& ft_person_copy.age == person_copy.age)
+				printf("%s%s%s", GREEN, " [OK] ", NC);
+			else
+			{
+				printf("%s%s%s", RED, " [FAILED] ", NC);
+				add_error("[ERROR] - ft_memcpy :\nstruct ft_person;\nchar ft_person.name[] = \"Pavel G.\";\nft_memcpy(&ft_person, &ft_person_copy, sizeof(ft_person)) ->\nft_person_copy.name : ",
+					ft_person_copy.name);
+			}
+			exit(EXIT_SUCCESS);
+		}
+		else
+		{
+			if (childpid_sig(pid_b))
+				add_error("[CRASH] - ft_memcpy :\nstruct ft_person;\nchar ft_person.name[] = \"Pavel G.\";\nft_memcpy(&ft_person, &ft_person_copy, sizeof(ft_person));", NULL);
+			printf("\n");
+		}
+	}
 }
 
 static void test_ft_memccpy(void *(*func)(void *, const void *, int, size_t))
@@ -384,7 +480,7 @@ static void test_ft_memccpy(void *(*func)(void *, const void *, int, size_t))
 	void	*p1, *p2;
 
 	p1 = memccpy(buf2, buf1, 'i', 10);
-	p2 = ft_memccpy(buf2, buf1, 'i', 10);
+	p2 = func(buf2, buf1, 'i', 10);
 
 	if (p1 == p2)
 		printf("%s%s%s", GREEN, "[OK] ", NC);
