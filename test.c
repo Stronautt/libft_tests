@@ -6,7 +6,7 @@
 /*   By: pgritsen <pgritsen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/25 18:07:22 by pgritsen          #+#    #+#             */
-/*   Updated: 2017/11/08 20:52:31 by pgritsen         ###   ########.fr       */
+/*   Updated: 2017/11/08 20:54:49 by pgritsen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,6 @@
 #include <signal.h>
 #include <errno.h>
 #include <time.h>
-#include <pthread.h>
 
 /*
 **		Color Library
