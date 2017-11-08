@@ -76,7 +76,7 @@ elif [[ -z $1  ]] || [[ $1 = "debug" ]]; then
   ╚══════╝╚═╝╚═════╝ ╚═╝        ╚═╝          ╚═╝   ╚══════╝╚══════╝   ╚═╝ 
 
 
-  ${WHITE}v1.02 © pgritsen
+  ${WHITE}v1.03 © pgritsen
   https://github.com/CoZZmOnAvT/libft_tests
 ${FBLUE}\n${NC}\n\n";
 
