@@ -6,7 +6,7 @@
 /*   By: pgritsen <pgritsen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/25 18:07:22 by pgritsen          #+#    #+#             */
-/*   Updated: 2017/11/08 18:19:25 by pgritsen         ###   ########.fr       */
+/*   Updated: 2017/11/08 20:52:31 by pgritsen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -195,7 +195,7 @@ static void	test_ft_putstr(void)
 		printf("\t");
 		if (!(buff = output_get(&ft_putstr, "i'm putstr")))
 		{
-			add_error("[ERROR] - ft_putstr : ft_putstr(\"i'm putstr\") -> ", buff);
+			printf("\n[ERROR] - ft_putstr : ft_putstr(\"i'm putstr\") -> %s\n", buff);
 			exit(EXIT_FAILURE);
 		}
 		if (!strcmp(buff, "i'm putstr"))
@@ -203,7 +203,7 @@ static void	test_ft_putstr(void)
 		else
 		{
 			printf("%s[ERROR]%s", RED, NC);
-			add_error("[ERROR] - ft_putstr : ft_putstr(\"i'm putstr\") -> ", buff);
+			printf("\n[ERROR] - ft_putstr : ft_putstr(\"i'm putstr\") -> %s\n", buff);
 		}
 		free(buff);
 		exit(EXIT_SUCCESS);
@@ -237,7 +237,7 @@ static void	test_ft_putendl(void)
 		printf("\t");
 		if (!(buff = output_get(&ft_putendl, "i'm putendl")))
 		{
-			add_error("[ERROR] - ft_putendl : ft_putendl(\"i'm putendl\") -> ", buff);
+			printf("\n[ERROR] - ft_putendl : ft_putendl(\"i'm putendl\") -> %s\n", buff);
 			exit(EXIT_FAILURE);
 		}
 		if (!strcmp(buff, "i'm putendl\n"))
@@ -245,7 +245,7 @@ static void	test_ft_putendl(void)
 		else
 		{
 			printf("%s[ERROR]%s", RED, NC);
-			add_error("[ERROR] - ft_putendl : ft_putendl(\"i'm putendl\") -> ", buff);			
+			printf("\n[ERROR] - ft_putendl : ft_putendl(\"i'm putendl\") -> %s\n", buff);			
 		}
 		free(buff);
 		exit(EXIT_SUCCESS);
@@ -289,7 +289,7 @@ static void test_ft_memset(void *(*func)(void *, int, size_t))
 			printf("%s%s%s", GREEN, "[OK] ", NC);
 		else
 		{
-			add_error("[ERROR] - ft_memset :\nchar ft_s1[] = \"Hello World!\";\nft_memset(ft_s1, '\0', 4) -> ft_s1 : ",
+			printf("\n[ERROR] - ft_memset :\nchar ft_s1[] = \"Hello World!\";\nft_memset(ft_s1, '\0', 4) -> ft_s1 : %s\n",
 				mem_replace(ft_s1, '\0', '0', sizeof(ft_s1) - 1));
 			printf("%s%s%s", RED, "[FAILED] ", NC);
 		}
@@ -308,7 +308,7 @@ static void test_ft_memset(void *(*func)(void *, int, size_t))
 				printf("%s%s%s", GREEN, " [OK] ", NC);
 			else
 			{
-				add_error("[ERROR] - ft_memset :\nchar ft_s2[] = \"Hello World!\";\nft_memset(ft_s2, '\200', 0) -> ft_s2 : ", ft_s2);
+				printf("\n[ERROR] - ft_memset :\nchar ft_s2[] = \"Hello World!\";\nft_memset(ft_s2, '\200', 0) -> ft_s2 : %s\n", ft_s2);
 				printf("%s%s%s", RED, " [FAILED] ", NC);
 			}
 			exit(EXIT_SUCCESS);
@@ -326,7 +326,7 @@ static void test_ft_memset(void *(*func)(void *, int, size_t))
 					printf("%s%s%s", GREEN, " [OK] ", NC);
 				else
 				{
-					add_error("[ERROR] - ft_memset :\nchar ft_s3[] = \"Hello World!\";\nft_memset(ft_s3, 'O', sizeof(ft_s3)) -> ft_s3 : ", ft_s3);
+					printf("\n[ERROR] - ft_memset :\nchar ft_s3[] = \"Hello World!\";\nft_memset(ft_s3, 'O', sizeof(ft_s3)) -> ft_s3 : %s\n", ft_s3);
 					printf("%s%s%s", RED, " [FAILED] ", NC);
 				}
 				exit(EXIT_SUCCESS);
@@ -344,7 +344,7 @@ static void test_ft_memset(void *(*func)(void *, int, size_t))
 						printf("%s%s%s", GREEN, " [OK] ", NC);
 					else
 					{
-						add_error("[ERROR] - ft_memset :\nchar ft_s4[] = \"Hello World!\";\nft_memset(ft_s4, '-', 1) -> ft_s4 : ", ft_s4);
+						printf("\n[ERROR] - ft_memset :\nchar ft_s4[] = \"Hello World!\";\nft_memset(ft_s4, '-', 1) -> ft_s4 : %s\n", ft_s4);
 						printf("%s%s%s", RED, " [FAILED] ", NC);
 					}
 					exit(EXIT_SUCCESS);
@@ -382,7 +382,7 @@ static void test_ft_bzero(void *(*func)(void *, size_t))
 		else
 		{
 			printf("%s%s%s", RED, "[FAILED] ", NC);
-			add_error("[ERROR] - ft_bzero :\nchar ft_s1[] = \"Hello World!\";\nft_bzero(ft_s1, 4) -> ft_s1 : ",
+			printf("\n[ERROR] - ft_bzero :\nchar ft_s1[] = \"Hello World!\";\nft_bzero(ft_s1, 4) -> ft_s1 : %s\n",
 				mem_replace(ft_s1, 0, '0', sizeof(ft_s1) - 1));
 		}
 		exit(EXIT_SUCCESS);
@@ -401,7 +401,7 @@ static void test_ft_bzero(void *(*func)(void *, size_t))
 			else
 			{
 				printf("%s%s%s", RED, " [FAILED] ", NC);
-				add_error("[ERROR] - ft_bzero :\nchar ft_s2[] = \"Hello World!\";\nft_bzero(ft_s2, 0) -> ft_s2 : ",
+				printf("\n[ERROR] - ft_bzero :\nchar ft_s2[] = \"Hello World!\";\nft_bzero(ft_s2, 0) -> ft_s2 : %s\n",
 					mem_replace(ft_s2, 0, '0', sizeof(ft_s2) - 1));
 			}
 			exit(EXIT_SUCCESS);
@@ -420,7 +420,7 @@ static void test_ft_bzero(void *(*func)(void *, size_t))
 				else
 				{
 					printf("%s%s%s", RED, " [FAILED] ", NC);
-					add_error("[ERROR] - ft_bzero :\nchar ft_s3[] = \"Hello World!\";\nft_bzero(ft_s3, sizeof(ft_s3)) -> ft_s3 : ",
+					printf("\n[ERROR] - ft_bzero :\nchar ft_s3[] = \"Hello World!\";\nft_bzero(ft_s3, sizeof(ft_s3)) -> ft_s3 : %s\n",
 						mem_replace(ft_s3, 0, '0', sizeof(ft_s3) - 1));
 				}
 				exit(EXIT_SUCCESS);
@@ -439,7 +439,7 @@ static void test_ft_bzero(void *(*func)(void *, size_t))
 					else
 					{
 						printf("%s%s%s", RED, " [FAILED] ", NC);
-						add_error("[ERROR] - ft_bzero :\nchar ft_s4[] = \"Hello World!\";\nft_bzero(ft_s4, 1) -> ft_s4 : ",
+						printf("\n[ERROR] - ft_bzero :\nchar ft_s4[] = \"Hello World!\";\nft_bzero(ft_s4, 1) -> ft_s4 : %s\n",
 							mem_replace(ft_s4, 0, '0', sizeof(ft_s4) - 1));
 					}
 					exit(EXIT_SUCCESS);
@@ -480,7 +480,7 @@ static void	test_ft_memcpy(void *(*func)(void *, const void *, size_t))
 		else
 		{
 			printf("%s%s%s", RED, " [FAILED] ", NC);
-			add_error("[ERROR] - ft_memcpy :\nchar name[] = \"Pavel G.\";\nft_memcpy(ft_person.name, name, strlen(name) + 1) -> ft_person.name : ",
+			printf("\n[ERROR] - ft_memcpy :\nchar name[] = \"Pavel G.\";\nft_memcpy(ft_person.name, name, strlen(name) + 1) -> ft_person.name : %s\n",
 				ft_person.name);
 		}
 		exit(EXIT_SUCCESS);
@@ -502,7 +502,7 @@ static void	test_ft_memcpy(void *(*func)(void *, const void *, size_t))
 			else
 			{
 				printf("%s%s%s", RED, " [FAILED] ", NC);
-				add_error("[ERROR] - ft_memcpy :\nstruct ft_person;\nchar ft_person.name[] = \"Pavel G.\";\nft_memcpy(&ft_person, &ft_person_copy, sizeof(ft_person)) ->\nft_person_copy.name : ",
+				printf("\n[ERROR] - ft_memcpy :\nstruct ft_person;\nchar ft_person.name[] = \"Pavel G.\";\nft_memcpy(&ft_person, &ft_person_copy, sizeof(ft_person)) ->\nft_person_copy.name : %s\n",
 					ft_person_copy.name);
 			}
 			exit(EXIT_SUCCESS);
@@ -536,7 +536,7 @@ static void test_ft_memccpy(void *(*func)(void *, const void *, int, size_t))
 		else
 		{
 			printf("%s%s%s", RED, " [FAILED] ", NC);
-			add_error("[ERROR] - ft_memccpy :\nchar	src[] = \"test basic du memccpy !\";\nft_memccpy(buff1, src, 'z', 22) -> buff1 : ", buff1);
+			printf("\n[ERROR] - ft_memccpy :\nchar	src[] = \"test basic du memccpy !\";\nft_memccpy(buff1, src, 'z', 22) -> buff1 : %s\n", buff1);
 		}
 		exit(EXIT_SUCCESS);
 	}
@@ -559,7 +559,7 @@ static void test_ft_memccpy(void *(*func)(void *, const void *, int, size_t))
 			else
 			{
 				printf("%s%s%s", RED, "[FAILED] ", NC);
-				add_error("[ERROR] - ft_memccpy :\nchar	buf1[] = \"Ceci est un test.\";\nft_memccpy(buf2, buf1, 'i', 10) -> buf2 : ", buf2);
+				printf("\n[ERROR] - ft_memccpy :\nchar	buf1[] = \"Ceci est un test.\";\nft_memccpy(buf2, buf1, 'i', 10) -> buf2 : %s\n", buf2);
 			}
 			exit(EXIT_SUCCESS);
 		}
@@ -581,7 +581,7 @@ static void test_ft_memccpy(void *(*func)(void *, const void *, int, size_t))
 				else
 				{
 					printf("%s%s%s", RED, " [FAILED] ", NC);
-					add_error("[ERROR] - ft_memccpy :\nchar	src[] = \"test basic du memccpy !\";\nft_memccpy(ft_destination, src, '\0', strlen(src) + 1) -> ft_destination : ", ft_destination);
+					printf("\n[ERROR] - ft_memccpy :\nchar	src[] = \"test basic du memccpy !\";\nft_memccpy(ft_destination, src, '\0', strlen(src) + 1) -> ft_destination : %s\n", ft_destination);
 				}
 				exit(EXIT_SUCCESS);			
 			}
@@ -600,7 +600,7 @@ static void test_ft_memccpy(void *(*func)(void *, const void *, int, size_t))
 					else
 					{
 						printf("%s%s%s", RED, " [FAILED] ", NC);
-						add_error("[ERROR] - ft_memccpy :\nchar	src[] = \"test basic du memccpy !\";\nft_memccpy(ft_destination, src, 'R', strlen(src) + 1) -> ft_destination : ", ft_destination);
+						printf("\n[ERROR] - ft_memccpy :\nchar	src[] = \"test basic du memccpy !\";\nft_memccpy(ft_destination, src, 'R', strlen(src) + 1) -> ft_destination : %s\n", ft_destination);
 					}
 					exit(EXIT_SUCCESS);	
 				}
@@ -632,7 +632,7 @@ static void test_ft_memmove(void *(*func)(void *, const void *, size_t))
 		else
 		{
 			printf("%s%s%s", RED, "[FAILED] ", NC);
-			add_error("[ERROR] - ft_memmove :\nchar	ft_a[128] = \"OKOKO World!\";\nft_memmove(ft_a, \"Hello\", 5) -> ft_a : ", ft_a);
+			printf("\n[ERROR] - ft_memmove :\nchar	ft_a[128] = \"OKOKO World!\";\nft_memmove(ft_a, \"Hello\", 5) -> ft_a : %s\n", ft_a);
 		}
 		exit(EXIT_SUCCESS);
 	}
@@ -650,7 +650,7 @@ static void test_ft_memmove(void *(*func)(void *, const void *, size_t))
 			else
 			{
 				printf("%s%s%s", RED, " [FAILED] ", NC);
-				add_error("[ERROR] - ft_memmove :\nchar	ft_a[128] = \"Hello World!\";\nft_memmove(ft_a, \"H\0llo\", 5) -> ft_a : ",
+				printf("\n[ERROR] - ft_memmove :\nchar	ft_a[128] = \"Hello World!\";\nft_memmove(ft_a, \"H\0llo\", 5) -> ft_a : %s\n",
 					mem_replace(ft_a, 0, '0', sizeof(ft_a) - 1));
 			}
 			exit(EXIT_SUCCESS);
@@ -675,7 +675,7 @@ static void test_ft_memmove(void *(*func)(void *, const void *, size_t))
 				else
 				{
 					printf("%s%s%s", RED, " [FAILED] ", NC);
-					add_error("[ERROR] - ft_memmove :\nchar	ft_a[128] = \"OKOKO World!\";\nchar	b[] = \"It's Perfect!!!\";\nft_memmove(ft_a, b, strlen(b) + 1) -> ft_a : ", ft_a);
+					printf("\n[ERROR] - ft_memmove :\nchar	ft_a[128] = \"OKOKO World!\";\nchar	b[] = \"It's Perfect!!!\";\nft_memmove(ft_a, b, strlen(b) + 1) -> ft_a : %s\n", ft_a);
 				}
 				exit(EXIT_SUCCESS);			
 			}
@@ -697,7 +697,7 @@ static void test_ft_memmove(void *(*func)(void *, const void *, size_t))
 					else
 					{
 						printf("%s%s%s", RED, " [FAILED] ", NC);
-						add_error("[ERROR] - ft_memmove :\nchar	ft_a[128] = \"It's Perfect!!!\";\nft_memmove(ft_a + 15, ft_a + 4, 11) -> ft_a : ", ft_a);
+						printf("\n[ERROR] - ft_memmove :\nchar	ft_a[128] = \"It's Perfect!!!\";\nft_memmove(ft_a + 15, ft_a + 4, 11) -> ft_a : %s\n", ft_a);
 					}
 					exit(EXIT_SUCCESS);	
 				}
@@ -737,7 +737,7 @@ static void	test_ft_memchr(void *(*func)(const void *, int, size_t))
 		else
 		{			
 			printf("%s%s%s", RED, "[FAILED] ", NC);
-			add_error("[ERROR] - ft_memchr :\nchar s1[] = \"Example string\";\nft_memchr(s1, 'p', strlen(s1)) -> ", p);
+			printf("\n[ERROR] - ft_memchr :\nchar s1[] = \"Example string\";\nft_memchr(s1, 'p', strlen(s1)) -> %s\n", p);
 		}
 		exit(EXIT_SUCCESS);
 	}
@@ -753,7 +753,7 @@ static void	test_ft_memchr(void *(*func)(const void *, int, size_t))
 			else
 			{
 				printf("%s%s%s", RED, " [FAILED] ", NC);
-				add_error("[ERROR] - ft_memchr :\nchar *s2 = \"\";\nft_memchr(s2, 'x', 0) -> ", ft_memchr(s2, 'x', 0));
+				printf("\n[ERROR] - ft_memchr :\nchar *s2 = \"\";\nft_memchr(s2, 'x', 0) -> %s\n", ft_memchr(s2, 'x', 0));
 			}
 			exit(EXIT_SUCCESS);
 		}
@@ -769,7 +769,7 @@ static void	test_ft_memchr(void *(*func)(const void *, int, size_t))
 				else
 				{
 					printf("%s%s%s", RED, " [FAILED] ", NC);
-					add_error("[ERROR] - ft_memchr :\nchar *s3 = \"abcdefabcdef\";\nft_memchr(s3, 'y', 0) -> ", ft_memchr(s3, 'y', 0));
+					printf("\n[ERROR] - ft_memchr :\nchar *s3 = \"abcdefabcdef\";\nft_memchr(s3, 'y', 0) -> %s\n", ft_memchr(s3, 'y', 0));
 				}
 				exit(EXIT_SUCCESS);			
 			}
@@ -785,7 +785,7 @@ static void	test_ft_memchr(void *(*func)(const void *, int, size_t))
 					else
 					{
 						printf("%s%s%s", RED, " [FAILED] ", NC);
-						add_error("[ERROR] - ft_memchr :\nchar *s4 = \"abcdefabcdef\";\nft_memchr(s4, '1', 20) -> ", ft_memchr(s4, '1', 20));
+						printf("\n[ERROR] - ft_memchr :\nchar *s4 = \"abcdefabcdef\";\nft_memchr(s4, '1', 20) -> %s\n", ft_memchr(s4, '1', 20));
 					}
 					exit(EXIT_SUCCESS);
 				}
@@ -819,7 +819,7 @@ static void	test_ft_memcmp(int (*func)(const void *, const void *, size_t))
 		else
 		{
 			printf("%s%s%s", RED, "[FAILED] ", NC);
-			add_error("[ERROR] - ft_memcmp :\nchar buffer1[] = \"DWgaOtP12df0\";\nchar	buffer2[] = \"DWgaOtP12DF0i\";\nft_memcmp(buffer1, buffer2, sizeof(buffer1)) -> ", q_itoa(n2));
+			printf("\n[ERROR] - ft_memcmp :\nchar buffer1[] = \"DWgaOtP12df0\";\nchar	buffer2[] = \"DWgaOtP12DF0i\";\nft_memcmp(buffer1, buffer2, sizeof(buffer1)) -> %s\n", q_itoa(n2));
 		}
 		exit(EXIT_SUCCESS);
 	}
@@ -838,7 +838,7 @@ static void	test_ft_memcmp(int (*func)(const void *, const void *, size_t))
 			else
 			{
 				printf("%s%s%s", RED, " [FAILED] ", NC);
-				add_error("[ERROR] - ft_memcmp :\nchar buffer1[] = \"DWgaOtP12df0\";\nchar	buffer2[] = \"DWgaOtP12DF0i\";\nft_memcmp(buffer1, buffer2, 9) -> ", q_itoa(n2));
+				printf("\n[ERROR] - ft_memcmp :\nchar buffer1[] = \"DWgaOtP12df0\";\nchar	buffer2[] = \"DWgaOtP12DF0i\";\nft_memcmp(buffer1, buffer2, 9) -> %s\n", q_itoa(n2));
 			}
 			exit(EXIT_SUCCESS);
 		}
@@ -860,7 +860,7 @@ static void	test_ft_memcmp(int (*func)(const void *, const void *, size_t))
 				else
 				{
 					printf("%s%s%s", RED, " [FAILED] ", NC);
-					add_error("[ERROR] - ft_memcmp :\nchar buffer3[] = \"lox mydak\";\nchar buffer4[] = \"lox mydaki\";\nft_memcmp(buffer3, buffer4, 10) -> ", q_itoa(n2));
+					printf("\n[ERROR] - ft_memcmp :\nchar buffer3[] = \"lox mydak\";\nchar buffer4[] = \"lox mydaki\";\nft_memcmp(buffer3, buffer4, 10) -> %s\n", q_itoa(n2));
 				}
 				exit(EXIT_SUCCESS);			
 			}
@@ -886,7 +886,7 @@ static void	test_ft_strlen(size_t (*func)(const char *))
 		else
 		{
 			printf("%s%s%s", RED, "[FAILED] ", NC);
-			add_error("[ERROR] - ft_strlen : ft_strlen(\"Hello World!\") -> ", q_itoa(ft_strlen("Hello World!")));
+			printf("\n[ERROR] - ft_strlen : ft_strlen(\"Hello World!\") -> %s\n", q_itoa(ft_strlen("Hello World!")));
 		}
 		exit(EXIT_SUCCESS);
 	}
@@ -902,7 +902,7 @@ static void	test_ft_strlen(size_t (*func)(const char *))
 			else
 			{
 				printf("%s%s%s", RED, " [FAILED] ", NC);
-				add_error("[ERROR] - ft_strlen : ft_strlen(\"\") -> ", q_itoa(ft_strlen("")));
+				printf("\n[ERROR] - ft_strlen : ft_strlen(\"\") -> %s\n", q_itoa(ft_strlen("")));
 			}
 			exit(EXIT_SUCCESS);
 		}
@@ -918,7 +918,7 @@ static void	test_ft_strlen(size_t (*func)(const char *))
 				else
 				{
 					printf("%s%s%s", RED, " [FAILED] ", NC);
-					add_error("[ERROR] - ft_strlen : ft_strlen(\"H\") -> ", q_itoa(ft_strlen("H")));
+					printf("\n[ERROR] - ft_strlen : ft_strlen(\"H\") -> %s\n", q_itoa(ft_strlen("H")));
 				}
 				exit(EXIT_SUCCESS);			
 			}
@@ -934,7 +934,7 @@ static void	test_ft_strlen(size_t (*func)(const char *))
 					else
 					{
 						printf("%s%s%s", RED, " [FAILED] ", NC);
-						add_error("[ERROR] - ft_strlen : ft_strlen(\"Hel\0lo World!\") -> ", q_itoa(ft_strlen("Hel\0lo World!")));
+						printf("\n[ERROR] - ft_strlen : ft_strlen(\"Hel\0lo World!\") -> %s\n", q_itoa(ft_strlen("Hel\0lo World!")));
 					}
 					exit(EXIT_SUCCESS);	
 				}
@@ -968,7 +968,7 @@ static void	test_ft_strdup(char	*(*func)(const char *))
 		else
 		{
 			printf("%s%s%s", RED, "[FAILED] ", NC);
-			add_error("[ERROR] - ft_strdup :\nchar	s[11] = \"0123456789\";\nft_strdup(s) -> ", ft_d_s);
+			printf("\n[ERROR] - ft_strdup :\nchar	s[11] = \"0123456789\";\nft_strdup(s) -> %s\n", ft_d_s);
 		}
 		free(d_s);
 		free(ft_d_s);
@@ -989,7 +989,7 @@ static void	test_ft_strdup(char	*(*func)(const char *))
 			else
 			{
 				printf("%s%s%s", RED, " [FAILED] ", NC);
-				add_error("[ERROR] - ft_strdup :\nchar empt[1] = {0};\nft_strdup(empt) -> ", ft_d_s);
+				printf("\n[ERROR] - ft_strdup :\nchar empt[1] = {0};\nft_strdup(empt) -> %s\n", ft_d_s);
 			}
 			free(d_s);
 			free(ft_d_s);
@@ -1022,7 +1022,7 @@ static void	test_ft_strcpy(char	*(*func)(char *, const char *))
 		else
 		{
 			printf("%s%s%s", RED, "[FAILED] ", NC);
-			add_error("[ERROR] - ft_strcpy :\nchar s[] = \"Copy successful!\";\nft_strcpy(ft_o, s) -> ft_o : ", ft_o);
+			printf("\n[ERROR] - ft_strcpy :\nchar s[] = \"Copy successful!\";\nft_strcpy(ft_o, s) -> ft_o : %s\n", ft_o);
 		}
 		exit(EXIT_SUCCESS);
 	}
@@ -1041,7 +1041,7 @@ static void	test_ft_strcpy(char	*(*func)(char *, const char *))
 			else
 			{
 				printf("%s%s%s", RED, " [FAILED] ", NC);
-				add_error("[ERROR] - ft_strcpy : ft_strcpy(ft_o, \"\") -> ft_o : ", ft_o);
+				printf("\n[ERROR] - ft_strcpy : ft_strcpy(ft_o, \"\") -> ft_o : %s\n", ft_o);
 			}
 			exit(EXIT_SUCCESS);
 		}
@@ -1072,7 +1072,7 @@ static void	test_ft_strncpy(char *(*func)(char *, const char *, size_t))
 		else
 		{
 			printf("%s%s%s", RED, "[FAILED] ", NC);
-			add_error("[ERROR] - ft_strncpy :\nchar s[] = \"Copy successful!\";\nft_strncpy(ft_o, s, sizeof(ft_o)) -> ft_o : ", ft_o);
+			printf("\n[ERROR] - ft_strncpy :\nchar s[] = \"Copy successful!\";\nft_strncpy(ft_o, s, sizeof(ft_o)) -> ft_o : %s\n", ft_o);
 		}
 		exit(EXIT_SUCCESS);
 	}
@@ -1091,7 +1091,7 @@ static void	test_ft_strncpy(char *(*func)(char *, const char *, size_t))
 			else
 			{
 				printf("%s%s%s", RED, " [FAILED] ", NC);
-				add_error("[ERROR] - ft_strncpy : ft_strcpy(ft_o, \"\", 1) -> ft_o : ", ft_o);
+				printf("\n[ERROR] - ft_strncpy : ft_strcpy(ft_o, \"\", 1) -> ft_o : %s\n", ft_o);
 			}
 			exit(EXIT_SUCCESS);
 		}
@@ -1125,7 +1125,7 @@ static void	test_ft_strcat(char	*(*func)(char *, const char *))
 		else
 		{
 			printf("%s%s%s", RED, "[FAILED] ", NC);
-			add_error("[ERROR] - ft_strcat :\nchar ft_s[80];\nft_strcat(ft_s, \"strings are \");\nft_strcat(ft_s, \"concatenated.\") -> ft_s : ", ft_s);
+			printf("\n[ERROR] - ft_strcat :\nchar ft_s[80];\nft_strcat(ft_s, \"strings are \");\nft_strcat(ft_s, \"concatenated.\") -> ft_s : %s\n", ft_s);
 		}
 		exit(EXIT_SUCCESS);
 	}
@@ -1159,14 +1159,14 @@ static void	test_ft_strncat(char *(*func)(char *, const char *, size_t))
 		else
 		{
 			printf("%s%s%s", RED, "[FAILED] ", NC);
-			add_error("[ERROR] - ft_strncat :\nchar s[20] = \"or not to be\";\nstrcpy(ft_o, \"To be \");\nft_strncat(ft_o, s, 6) -> ft_o : ", ft_o);
+			printf("\n[ERROR] - ft_strncat :\nchar s[20] = \"or not to be\";\nstrcpy(ft_o, \"To be \");\nft_strncat(ft_o, s, 6) -> ft_o : %s\n", ft_o);
 		}
 		if (!strcmp(p, ft_p))
 			printf("%s%s%s", GREEN, " [OK] ", NC);
 		else
 		{
 			printf("%s%s%s", RED, " [FAILED] ", NC);
-			add_error("[ERROR] - ft_strncat :\nchar s[20] = \"or not to be\";\nstrcpy(ft_o, \"To be \");\nft_p = ft_strncat(ft_o, s, 6) -> ft_p : ", ft_p);
+			printf("\n[ERROR] - ft_strncat :\nchar s[20] = \"or not to be\";\nstrcpy(ft_o, \"To be \");\nft_p = ft_strncat(ft_o, s, 6) -> ft_p : %s\n", ft_p);
 		}
 		exit(EXIT_SUCCESS);
 	}
@@ -1186,7 +1186,7 @@ static void	test_ft_strncat(char *(*func)(char *, const char *, size_t))
 			else
 			{
 				printf("%s%s%s", RED, " [FAILED] ", NC);
-				add_error("[ERROR] - ft_strncat :\nchar s[20] = \"or not to be\";\nstrcpy(ft_o, \"To be \");\nft_p = ft_strncat(ft_o, s, 12) -> ft_p : ", ft_p);
+				printf("\n[ERROR] - ft_strncat :\nchar s[20] = \"or not to be\";\nstrcpy(ft_o, \"To be \");\nft_p = ft_strncat(ft_o, s, 12) -> ft_p : %s\n", ft_p);
 			}
 			exit(EXIT_SUCCESS);
 		}
@@ -1224,7 +1224,7 @@ static void	test_ft_strlcat(size_t (*func)(char *, const char *, size_t))
 		else
 		{
 			printf("%s%s%s", RED, "[FAILED] ", NC);
-			add_error("[ERROR] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_p_a, p_b, strlen(p_b) + 1) -> ", q_itoa(tmp));
+			printf("\n[ERROR] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_p_a, p_b, strlen(p_b) + 1) -> %s\n", q_itoa(tmp));
 		}
 		exit(EXIT_SUCCESS);
 	}
@@ -1242,7 +1242,7 @@ static void	test_ft_strlcat(size_t (*func)(char *, const char *, size_t))
 			else
 			{
 				printf("%s%s%s", RED, " [FAILED] ", NC);
-				add_error("[ERROR] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_p_a, p_b, sizeof(ft_p_a)) -> ", q_itoa(tmp));
+				printf("\n[ERROR] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_p_a, p_b, sizeof(ft_p_a)) -> %s\n", q_itoa(tmp));
 			}
 			exit(EXIT_SUCCESS);
 		}
@@ -1260,7 +1260,7 @@ static void	test_ft_strlcat(size_t (*func)(char *, const char *, size_t))
 				else
 				{
 					printf("%s%s%s", RED, " [FAILED] ", NC);
-					add_error("[ERROR] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_p_a, p_b, 1) -> ", q_itoa(tmp));
+					printf("\n[ERROR] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_p_a, p_b, 1) -> %s\n", q_itoa(tmp));
 				}
 				exit(EXIT_SUCCESS);			
 			}
@@ -1278,7 +1278,7 @@ static void	test_ft_strlcat(size_t (*func)(char *, const char *, size_t))
 					else
 					{
 						printf("%s%s%s", RED, " [FAILED] ", NC);
-						add_error("[ERROR] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_p_a, p_b, -1) -> ", q_itoa(tmp));
+						printf("\n[ERROR] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_p_a, p_b, -1) -> %s\n", q_itoa(tmp));
 					}
 					exit(EXIT_SUCCESS);	
 				}
@@ -1296,7 +1296,7 @@ static void	test_ft_strlcat(size_t (*func)(char *, const char *, size_t))
 						else
 						{
 							printf("%s%s%s", RED, " [FAILED] ", NC);
-							add_error("[ERROR] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_p_a, p_b, 0) -> ", q_itoa(tmp));
+							printf("\n[ERROR] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_p_a, p_b, 0) -> %s\n", q_itoa(tmp));
 						}
 						exit(EXIT_SUCCESS);
 					}
@@ -1314,7 +1314,7 @@ static void	test_ft_strlcat(size_t (*func)(char *, const char *, size_t))
 							else
 							{
 								printf("%s%s%s", RED, " [FAILED] ", NC);
-								add_error("[ERROR] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_a, b, strlen(b) + strlen(ft_a) + 1) -> ", q_itoa(tmp));
+								printf("\n[ERROR] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_a, b, strlen(b) + strlen(ft_a) + 1) -> %s\n", q_itoa(tmp));
 							}
 							exit(EXIT_SUCCESS);	
 						}
@@ -1332,7 +1332,7 @@ static void	test_ft_strlcat(size_t (*func)(char *, const char *, size_t))
 								else
 								{
 									printf("%s%s%s", RED, " [FAILED] ", NC);
-									add_error("[ERROR] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_a, b, strlen(b) + strlen(ft_a) - 1) -> ", q_itoa(tmp));
+									printf("\n[ERROR] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_a, b, strlen(b) + strlen(ft_a) - 1) -> %s\n", q_itoa(tmp));
 								}
 								exit(EXIT_SUCCESS);
 							}
@@ -1350,7 +1350,7 @@ static void	test_ft_strlcat(size_t (*func)(char *, const char *, size_t))
 									else
 									{
 										printf("%s%s%s", RED, " [FAILED] ", NC);
-										add_error("[ERROR] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_a, b, strlen(b) + 1)) -> ", q_itoa(tmp));
+										printf("\n[ERROR] - ft_strlcat :\nft_p_a = strdup(\"Hello\");\np_b = strdup(\" World\");\nft_strlcat(ft_a, b, strlen(b) + 1)) -> %s\n", q_itoa(tmp));
 									}
 									exit(EXIT_SUCCESS);
 								}
@@ -1383,7 +1383,7 @@ static void	test_ft_strchr(char	*(*func)(const char *, int))
 		else
 		{			
 			printf("%s%s%s", RED, "[FAILED] ", NC);
-			add_error("[ERROR] - ft_strchr :\nchar ft_a[128] = \"Hello World!\";\nft_strchr(ft_a, 'o') -> ", func(ft_a, 'o'));
+			printf("\n[ERROR] - ft_strchr :\nchar ft_a[128] = \"Hello World!\";\nft_strchr(ft_a, 'o') -> %s\n", func(ft_a, 'o'));
 		}
 		exit(EXIT_SUCCESS);
 	}
@@ -1399,7 +1399,7 @@ static void	test_ft_strchr(char	*(*func)(const char *, int))
 			else
 			{
 				printf("%s%s%s", RED, " [FAILED] ", NC);
-				add_error("[ERROR] - ft_strchr :\nchar ft_a[128] = \"Hello World!\";\nft_strchr(ft_a, '3') -> ", func(ft_a, '3'));
+				printf("\n[ERROR] - ft_strchr :\nchar ft_a[128] = \"Hello World!\";\nft_strchr(ft_a, '3') -> %s\n", func(ft_a, '3'));
 			}
 			exit(EXIT_SUCCESS);
 		}
@@ -1415,7 +1415,7 @@ static void	test_ft_strchr(char	*(*func)(const char *, int))
 				else
 				{
 					printf("%s%s%s", RED, " [FAILED] ", NC);
-					add_error("[ERROR] - ft_strchr :\nchar ft_a[128] = \"Hello World!\";\nft_strchr(ft_a, '!') -> ", func(ft_a, '!'));
+					printf("\n[ERROR] - ft_strchr :\nchar ft_a[128] = \"Hello World!\";\nft_strchr(ft_a, '!') -> %s\n", func(ft_a, '!'));
 				}
 				exit(EXIT_SUCCESS);			
 			}
@@ -1431,7 +1431,7 @@ static void	test_ft_strchr(char	*(*func)(const char *, int))
 					else
 					{
 						printf("%s%s%s", RED, " [FAILED] ", NC);
-						add_error("[ERROR] - ft_strchr :\nchar ft_a[128] = \"Hello World!\";\nft_strchr(ft_a, 0) -> ", func(ft_a, 0));
+						printf("\n[ERROR] - ft_strchr :\nchar ft_a[128] = \"Hello World!\";\nft_strchr(ft_a, 0) -> %s\n", func(ft_a, 0));
 					}
 					exit(EXIT_SUCCESS);	
 				}
@@ -1447,7 +1447,7 @@ static void	test_ft_strchr(char	*(*func)(const char *, int))
 						else
 						{
 							printf("%s%s%s", RED, " [FAILED] ", NC);
-							add_error("[ERROR] - ft_strchr :\nchar ft_a[128] = \"Hello World!\";\nft_strchr(ft_a, '0') -> ft_a : ", ft_a);
+							printf("\n[ERROR] - ft_strchr :\nchar ft_a[128] = \"Hello World!\";\nft_strchr(ft_a, '0') -> ft_a : %s\n", ft_a);
 						}
 						exit(EXIT_SUCCESS);
 					}
@@ -1477,7 +1477,7 @@ static void	test_ft_strrchr(char *(*func)(const char *, int))
 		else
 		{
 			printf("%s%s%s", RED, "[FAILED] ", NC);
-			add_error("[ERROR] - ft_strrchr :\nchar ft_a[128] = \"Hello World!\";\nft_strrchr(ft_a, 'o') -> ", func(ft_a, 'o'));
+			printf("\n[ERROR] - ft_strrchr :\nchar ft_a[128] = \"Hello World!\";\nft_strrchr(ft_a, 'o') -> %s\n", func(ft_a, 'o'));
 		}
 		exit(EXIT_SUCCESS);
 	}
@@ -1493,7 +1493,7 @@ static void	test_ft_strrchr(char *(*func)(const char *, int))
 			else
 			{
 				printf("%s%s%s", RED, " [FAILED] ", NC);
-				add_error("[ERROR] - ft_strrchr :\nchar ft_a[128] = \"Hello World!\";\nft_strrchr(ft_a, '3') -> ", func(ft_a, '3'));
+				printf("\n[ERROR] - ft_strrchr :\nchar ft_a[128] = \"Hello World!\";\nft_strrchr(ft_a, '3') -> %s\n", func(ft_a, '3'));
 			}
 			exit(EXIT_SUCCESS);
 		}
@@ -1525,7 +1525,7 @@ static void	test_ft_strrchr(char *(*func)(const char *, int))
 					else
 					{
 						printf("%s%s%s", RED, " [FAILED] ", NC);
-						add_error("[ERROR] - ft_strrchr :\nchar ft_a[128] = \"Hello World!\";\nft_strrchr(ft_a, 0) -> ", func(ft_a, 0));
+						printf("\n[ERROR] - ft_strrchr :\nchar ft_a[128] = \"Hello World!\";\nft_strrchr(ft_a, 0) -> %s\n", func(ft_a, 0));
 					}
 					exit(EXIT_SUCCESS);	
 				}
@@ -1553,7 +1553,7 @@ static void	test_ft_strstr(char *(*func)(const char *, const char *))
 		else
 		{
 			printf("%s%s%s", RED, "[FAILED] ", NC);
-			add_error("[ERROR] - ft_strstr :\nconst char *largestring = \"Foo Bar Baz\";\nft_strstr(largestring, \"Bar\") -> ", func(largestring, "Bar"));
+			printf("\n[ERROR] - ft_strstr :\nconst char *largestring = \"Foo Bar Baz\";\nft_strstr(largestring, \"Bar\") -> %s\n", func(largestring, "Bar"));
 		}
 		exit(EXIT_SUCCESS);
 	}
@@ -1569,7 +1569,7 @@ static void	test_ft_strstr(char *(*func)(const char *, const char *))
 			else
 			{
 				printf("%s%s%s", RED, " [FAILED] ", NC);
-				add_error("[ERROR] - ft_strstr :\nconst char *largestring = \"Foo Bar Baz\";\nft_strstr(largestring, \"\") -> ", func(largestring, ""));
+				printf("\n[ERROR] - ft_strstr :\nconst char *largestring = \"Foo Bar Baz\";\nft_strstr(largestring, \"\") -> %s\n", func(largestring, ""));
 			}
 			exit(EXIT_SUCCESS);
 		}
@@ -1586,7 +1586,7 @@ static void	test_ft_strstr(char *(*func)(const char *, const char *))
 				else
 				{
 					printf("%s%s%s", RED, " [FAILED] ", NC);
-					add_error("[ERROR] - ft_strstr :\nconst char *largestring = \"Foo Bar Baz\";\nft_strstr(largestring, \"QW\") -> ", func(largestring, "QW"));
+					printf("\n[ERROR] - ft_strstr :\nconst char *largestring = \"Foo Bar Baz\";\nft_strstr(largestring, \"QW\") -> %s\n", func(largestring, "QW"));
 				}
 				exit(EXIT_SUCCESS);			
 			}
@@ -1602,7 +1602,7 @@ static void	test_ft_strstr(char *(*func)(const char *, const char *))
 					else
 					{
 						printf("%s%s%s", RED, " [FAILED] ", NC);
-						add_error("[ERROR] - ft_strstr :\nconst char *largestring = \"Foo Bar Baz\";\nft_strstr(largestring, \"Ba\") -> ", func(largestring, "Ba"));
+						printf("\n[ERROR] - ft_strstr :\nconst char *largestring = \"Foo Bar Baz\";\nft_strstr(largestring, \"Ba\") -> %s\n", func(largestring, "Ba"));
 					}
 					exit(EXIT_SUCCESS);	
 				}
@@ -1631,7 +1631,7 @@ static void	test_ft_strnstr(char *(*func)(const char *, const char *, size_t))
 		else
 		{
 			printf("%s%s%s", RED, "[FAILED]", NC);
-			add_error("[ERROR] - ft_strnstr :\nconst char largestring[] = \"MZIRIBMZIRIBMZE123\";\nft_strnstr(largestring, \"MZIRIBMZE\", -1) -> ", func(largestring, "MZIRIBMZE", -1));
+			printf("\n[ERROR] - ft_strnstr :\nconst char largestring[] = \"MZIRIBMZIRIBMZE123\";\nft_strnstr(largestring, \"MZIRIBMZE\", -1) -> %s\n", func(largestring, "MZIRIBMZE", -1));
 		}
 		exit(EXIT_SUCCESS);
 	}
@@ -1648,7 +1648,7 @@ static void	test_ft_strnstr(char *(*func)(const char *, const char *, size_t))
 				else
 				{
 					printf("%s%s%s", RED, " [FAILED] ", NC);
-					add_error("[ERROR] - ft_strnstr :\nconst char largestring[] = \"MZIRIBMZIRIBMZE123\";\nft_strnstr(largestring, \"MZIRIBMZE\", %d[1 - 9]) -> ", func(largestring, "MZIRIBMZE", i));
+					printf("\n[ERROR] - ft_strnstr :\nconst char largestring[] = \"MZIRIBMZIRIBMZE123\";\nft_strnstr(largestring, \"MZIRIBMZE\", %d[1 - 9]) -> %s\n", func(largestring, "MZIRIBMZE", i));
 				}
 			exit(EXIT_SUCCESS);
 		}
@@ -1670,7 +1670,7 @@ static void	test_ft_strnstr(char *(*func)(const char *, const char *, size_t))
 				else
 				{
 					printf("%s%s%s", RED, "[FAILED]", NC);
-					add_error("[ERROR] - ft_strnstr :\nchar	buf[10] = \"un deux 9\";\nft_strnstr(buf, \"deux\", 10) -> ", func(buf, "deux", 10));
+					printf("\n[ERROR] - ft_strnstr :\nchar	buf[10] = \"un deux 9\";\nft_strnstr(buf, \"deux\", 10) -> %s\n", func(buf, "deux", 10));
 				}
 				exit(EXIT_SUCCESS);			
 			}
@@ -1703,7 +1703,7 @@ static void	test_ft_strcmp(int (*func)(const char *, const char *))
 		else
 		{
 			printf("%s%s%s", RED, "[FAILED] ", NC);
-			add_error("[ERROR] - ft_strcmp : ft_strcmp(\"Hello World\", \"hello Wolrd\") -> ", q_itoa(func(a, b)));
+			printf("\n[ERROR] - ft_strcmp : ft_strcmp(\"Hello World\", \"hello Wolrd\") -> %s\n", q_itoa(func(a, b)));
 		}
 		exit(EXIT_SUCCESS);
 	}
@@ -1719,7 +1719,7 @@ static void	test_ft_strcmp(int (*func)(const char *, const char *))
 			else
 			{
 				printf("%s%s%s", RED, " [FAILED] ", NC);
-				add_error("[ERROR] - ft_strcmp : ft_strcmp(\"Hello World\", \"Hello WolrD\") -> ", q_itoa(func(a, c)));
+				printf("\n[ERROR] - ft_strcmp : ft_strcmp(\"Hello World\", \"Hello WolrD\") -> %s\n", q_itoa(func(a, c)));
 			}
 			exit(EXIT_SUCCESS);
 		}
@@ -1735,7 +1735,7 @@ static void	test_ft_strcmp(int (*func)(const char *, const char *))
 				else
 				{
 					printf("%s%s%s", RED, " [FAILED] ", NC);
-					add_error("[ERROR] - ft_strcmp : ft_strcmp(\"Hello World\", \"Hello\") -> ", q_itoa(func(a, d)));
+					printf("\n[ERROR] - ft_strcmp : ft_strcmp(\"Hello World\", \"Hello\") -> %s\n", q_itoa(func(a, d)));
 				}
 				exit(EXIT_SUCCESS);			
 			}
@@ -1751,7 +1751,7 @@ static void	test_ft_strcmp(int (*func)(const char *, const char *))
 					else
 					{
 						printf("%s%s%s", RED, " [FAILED] ", NC);
-						add_error("[ERROR] - ft_strcmp : ft_strcmp(\"Hello World\", \"hello\") -> ", q_itoa(func(a, e)));
+						printf("\n[ERROR] - ft_strcmp : ft_strcmp(\"Hello World\", \"hello\") -> %s\n", q_itoa(func(a, e)));
 					}
 					exit(EXIT_SUCCESS);	
 				}
@@ -1767,7 +1767,7 @@ static void	test_ft_strcmp(int (*func)(const char *, const char *))
 						else
 						{
 							printf("%s%s%s", RED, " [FAILED] ", NC);
-							add_error("[ERROR] - ft_strcmp : ft_strcmp(\"Hello World\", \"Hello Wolrd \") -> ", q_itoa(func(a, f)));
+							printf("\n[ERROR] - ft_strcmp : ft_strcmp(\"Hello World\", \"Hello Wolrd \") -> %s\n", q_itoa(func(a, f)));
 						}						
 						exit(EXIT_SUCCESS);
 					}
@@ -1783,7 +1783,7 @@ static void	test_ft_strcmp(int (*func)(const char *, const char *))
 							else
 							{
 								printf("%s%s%s", RED, " [FAILED] ", NC);
-								add_error("[ERROR] - ft_strcmp : ft_strcmp(\"Hello World\", \"Hello Wolr\200\") -> ", q_itoa(func(a, g)));
+								printf("\n[ERROR] - ft_strcmp : ft_strcmp(\"Hello World\", \"Hello Wolr\200\") -> %s\n", q_itoa(func(a, g)));
 							}
 							exit(EXIT_SUCCESS);	
 						}
@@ -1820,7 +1820,7 @@ static void	test_ft_strncmp(int (*func)(const char *, const char *, size_t))
 		else
 		{
 			printf("%s%s%s", RED, "[FAILED] ", NC);
-			add_error("[ERROR] - ft_strncmp : ft_strncmp(\"Hello World\", \"hello Wolrd\", 12) -> ", q_itoa(func(a, b, sizeof(a))));
+			printf("\n[ERROR] - ft_strncmp : ft_strncmp(\"Hello World\", \"hello Wolrd\", 12) -> %s\n", q_itoa(func(a, b, sizeof(a))));
 		}
 		exit(EXIT_SUCCESS);
 	}
@@ -1836,7 +1836,7 @@ static void	test_ft_strncmp(int (*func)(const char *, const char *, size_t))
 			else
 			{
 				printf("%s%s%s", RED, " [FAILED] ", NC);
-				add_error("[ERROR] - ft_strncmp : ft_strncmp(\"Hello World\", \"Hello WolrD\", 0) -> ", q_itoa(func(a, c, 0)));
+				printf("\n[ERROR] - ft_strncmp : ft_strncmp(\"Hello World\", \"Hello WolrD\", 0) -> %s\n", q_itoa(func(a, c, 0)));
 			}
 			exit(EXIT_SUCCESS);
 		}
@@ -1852,7 +1852,7 @@ static void	test_ft_strncmp(int (*func)(const char *, const char *, size_t))
 				else
 				{
 					printf("%s%s%s", RED, " [FAILED] ", NC);
-					add_error("[ERROR] - ft_strncmp : ft_strncmp(\"Hello World\", \"Hello\", 12) -> ", q_itoa(func(a, d, 12)));
+					printf("\n[ERROR] - ft_strncmp : ft_strncmp(\"Hello World\", \"Hello\", 12) -> %s\n", q_itoa(func(a, d, 12)));
 				}
 				exit(EXIT_SUCCESS);			
 			}
@@ -1868,7 +1868,7 @@ static void	test_ft_strncmp(int (*func)(const char *, const char *, size_t))
 					else
 					{
 						printf("%s%s%s", RED, " [FAILED] ", NC);
-						add_error("[ERROR] - ft_strncmp : ft_strncmp(\"Hello World\", \"hello\", 6) -> ", q_itoa(func(a, e, 6)));
+						printf("\n[ERROR] - ft_strncmp : ft_strncmp(\"Hello World\", \"hello\", 6) -> %s\n", q_itoa(func(a, e, 6)));
 					}
 					exit(EXIT_SUCCESS);	
 				}
@@ -1884,7 +1884,7 @@ static void	test_ft_strncmp(int (*func)(const char *, const char *, size_t))
 						else
 						{
 							printf("%s%s%s", RED, " [FAILED] ", NC);
-							add_error("[ERROR] - ft_strncmp : ft_strncmp(\"Hello World\", \"Hello Wolrd \", 13) -> ", q_itoa(func(a, f, 13)));
+							printf("\n[ERROR] - ft_strncmp : ft_strncmp(\"Hello World\", \"Hello Wolrd \", 13) -> %s\n", q_itoa(func(a, f, 13)));
 						}						
 						exit(EXIT_SUCCESS);
 					}
@@ -1900,7 +1900,7 @@ static void	test_ft_strncmp(int (*func)(const char *, const char *, size_t))
 							else
 							{
 								printf("%s%s%s", RED, " [FAILED] ", NC);
-								add_error("[ERROR] - ft_strncmp : ft_strncmp(\"Hello World\", \"Hello WolrD\", -1) -> ", q_itoa(func(a, c, -1)));
+								printf("\n[ERROR] - ft_strncmp : ft_strncmp(\"Hello World\", \"Hello WolrD\", -1) -> %s\n", q_itoa(func(a, c, -1)));
 							}
 							exit(EXIT_SUCCESS);	
 						}
@@ -1929,7 +1929,7 @@ static void	test_ft_atoi(int (*func)(const char *))
 		else
 		{
 			printf("%s%s%s", RED, "[FAILED] ", NC);
-			add_error("[ERROR] - ft_atoi : ft_atoi(\"   1425\") -> ", q_itoa(func("   1425")));
+			printf("\n[ERROR] - ft_atoi : ft_atoi(\"   1425\") -> %s\n", q_itoa(func("   1425")));
 		}
 		exit(EXIT_SUCCESS);
 	}
@@ -1945,7 +1945,7 @@ static void	test_ft_atoi(int (*func)(const char *))
 			else
 			{
 				printf("%s%s%s", RED, " [FAILED] ", NC);
-				add_error("[ERROR] - ft_atoi : ft_atoi(\"12s1425\") -> ", q_itoa(func("12s1425")));
+				printf("\n[ERROR] - ft_atoi : ft_atoi(\"12s1425\") -> %s\n", q_itoa(func("12s1425")));
 			}
 			exit(EXIT_SUCCESS);
 		}
@@ -1961,7 +1961,7 @@ static void	test_ft_atoi(int (*func)(const char *))
 				else
 				{
 					printf("%s%s%s", RED, " [FAILED] ", NC);
-					add_error("[ERROR] - ft_atoi : ft_atoi(\"\") -> ", q_itoa(func("")));
+					printf("\n[ERROR] - ft_atoi : ft_atoi(\"\") -> %s\n", q_itoa(func("")));
 				}
 				exit(EXIT_SUCCESS);			
 			}
@@ -1977,7 +1977,7 @@ static void	test_ft_atoi(int (*func)(const char *))
 					else
 					{
 						printf("%s%s%s", RED, " [FAILED] ", NC);
-						add_error("[ERROR] - ft_atoi : ft_atoi(\"     \t1425sad213\") -> ", q_itoa(func("     \t1425sad213")));
+						printf("\n[ERROR] - ft_atoi : ft_atoi(\"     \t1425sad213\") -> %s\n", q_itoa(func("     \t1425sad213")));
 					}
 					exit(EXIT_SUCCESS);	
 				}
@@ -1993,7 +1993,7 @@ static void	test_ft_atoi(int (*func)(const char *))
 						else
 						{
 							printf("%s%s%s", RED, " [FAILED] ", NC);
-							add_error("[ERROR] - ft_atoi : ft_atoi(\" 2147483647 \") -> ", q_itoa(func(" 2147483647 ")));
+							printf("\n[ERROR] - ft_atoi : ft_atoi(\" 2147483647 \") -> %s\n", q_itoa(func(" 2147483647 ")));
 						}
 						exit(EXIT_SUCCESS);
 					}
@@ -2009,7 +2009,7 @@ static void	test_ft_atoi(int (*func)(const char *))
 							else
 							{
 								printf("%s%s%s", RED, " [FAILED] ", NC);
-								add_error("[ERROR] - ft_atoi : ft_atoi(\"-2147483648\") -> ", q_itoa(func("-2147483648")));
+								printf("\n[ERROR] - ft_atoi : ft_atoi(\"-2147483648\") -> %s\n", q_itoa(func("-2147483648")));
 							}
 							exit(EXIT_SUCCESS);	
 						}
@@ -2025,7 +2025,7 @@ static void	test_ft_atoi(int (*func)(const char *))
 								else
 								{
 									printf("%s%s%s", RED, " [FAILED] ", NC);
-									add_error("[ERROR] - ft_atoi : ft_atoi(\"+2147483648\") -> ", q_itoa(func("+2147483648")));
+									printf("\n[ERROR] - ft_atoi : ft_atoi(\"+2147483648\") -> %s\n", q_itoa(func("+2147483648")));
 								}
 								exit(EXIT_SUCCESS);
 							}
@@ -2036,12 +2036,12 @@ static void	test_ft_atoi(int (*func)(const char *))
 								pid_h = fork();
 								if (pid_h == 0)
 								{
-									if (func("9223372036854775807") == atoi("9223372036854775807"))
+									if (func("18446744073709551615") == atoi("18446744073709551615"))
 										printf("%s%s%s", GREEN, " [OK] ", NC);
 									else
 									{
 										printf("%s%s%s", RED, " [FAILED] ", NC);
-										add_error("[ERROR] - ft_atoi : ft_atoi(\"9223372036854775807\") -> ", q_itoa(func("9223372036854775807")));
+										printf("\n[ERROR] - ft_atoi : ft_atoi(\"9223372036854775807\") -> %s\n", q_itoa(func("9223372036854775807")));
 									}
 									exit(EXIT_SUCCESS);
 								}
@@ -2052,12 +2052,12 @@ static void	test_ft_atoi(int (*func)(const char *))
 									pid_l = fork();
 									if (pid_l == 0)
 									{
-										if (func("9223372036854775808") == atoi("9223372036854775808"))
+										if (func("18446744073709551616") == atoi("18446744073709551616"))
 											printf("%s%s%s", GREEN, " [OK] ", NC);
 										else
 										{
 											printf("%s%s%s", RED, " [FAILED] ", NC);
-											add_error("[ERROR] - ft_atoi : ft_atoi(\"9223372036854775808\") -> ", q_itoa(func("9223372036854775808")));
+											printf("\n[ERROR] - ft_atoi : ft_atoi(\"18446744073709551616\") -> %s \n", q_itoa(func("18446744073709551616")));
 										}
 										exit(EXIT_SUCCESS);
 									}
@@ -2074,7 +2074,7 @@ static void	test_ft_atoi(int (*func)(const char *))
 											else
 											{
 												printf("%s%s%s", RED, " [FAILED] ", NC);
-												add_error("[ERROR] - ft_atoi : ft_atoi(\"922337203685477580712125325543357343463643464634633466344366323523959359238\") -> ", q_itoa(func("922337203685477580712125325543357343463643464634633466344366323523959359238")));
+												printf("\n[ERROR] - ft_atoi : ft_atoi(\"922337203685477580712125325543357343463643464634633466344366323523959359238\") -> %s\n", q_itoa(func("922337203685477580712125325543357343463643464634633466344366323523959359238")));
 											}
 											exit(EXIT_SUCCESS);
 										}
@@ -2091,7 +2091,7 @@ static void	test_ft_atoi(int (*func)(const char *))
 												else
 												{
 													printf("%s%s%s", RED, " [FAILED] ", NC);
-													add_error("[ERROR] - ft_atoi : ft_atoi(\"-922337203685477580712125325543357343463643464634633466344366323523959359238\") -> ", q_itoa(func("-922337203685477580712125325543357343463643464634633466344366323523959359238")));
+													printf("\n[ERROR] - ft_atoi : ft_atoi(\"-922337203685477580712125325543357343463643464634633466344366323523959359238\") -> %s\n", q_itoa(func("-922337203685477580712125325543357343463643464634633466344366323523959359238")));
 												}
 												exit(EXIT_SUCCESS);
 											}
@@ -2128,7 +2128,7 @@ static void	test_ft_strnew()
 		else
 		{
 			printf("%s%s%s", RED, "[FAILED] ", NC);
-			add_error("[ERROR] - ft_strnew : ft_strnew(5) -> %s - ", mem_replace(ft_strnew(5), 0, '0', 4));
+			printf("\n[ERROR] - ft_strnew : ft_strnew(5) -> %s\n", mem_replace(ft_strnew(5), 0, '0', 4));
 		}
 		exit(EXIT_SUCCESS);
 	}
@@ -2158,7 +2158,7 @@ static void	test_ft_strjoin()
 		else
 		{
 			printf("%s%s%s", RED, "[FAILED] ", NC);
-			add_error("[ERROR] - ft_strjoin :\nchar	s1[] = \"where is my \";\nchar	s2[] = \"malloc ???\";\nft_strjoin(s1, s2) -> ", p_s);
+			printf("\n[ERROR] - ft_strjoin :\nchar	s1[] = \"where is my \";\nchar	s2[] = \"malloc ???\";\nft_strjoin(s1, s2) ->  %s\n", p_s);
 		}
 		exit(EXIT_SUCCESS);
 	}
@@ -2204,7 +2204,7 @@ static void	test_ft_strtrim()
 		else
 		{
 			printf("%s%s%s", RED, "[FAILED] ", NC);
-			add_error("[ERROR] - ft_strtrim : ft_strtrim(\"\t   \n\n\n  \n\n\t    Hello \t  Please\n Trim me !\t\t\t\n  \t\t\t\t  \") -> ", s3);
+			printf("\n[ERROR] - ft_strtrim : ft_strtrim(\"\t   \n\n\n  \n\n\t    Hello \t  Please\n Trim me !\t\t\t\n  \t\t\t\t  \") ->  %s\n", s3);
 		}
 		exit(EXIT_SUCCESS);
 	}
@@ -2230,7 +2230,7 @@ static void	test_ft_strsplit()
 			if (strcmp(ft_test[i], test[i]))
 			{
 				printf("%s%s%s", RED, " [FAILED] ", NC);
-				add_error("[ERROR] - ft_strsplit : ft_strsplit(\"((((((((((((Hello((((((((((((((((((((((((((World((((((((((((((((((((\", '(')", NULL);
+				printf("\n[ERROR] - ft_strsplit : ft_strsplit(\"((((((((((((Hello((((((((((((((((((((((((((World((((((((((((((((((((\", '(') %s\n", NULL);
 				exit(EXIT_SUCCESS);
 			}
 		if ((int)ft_test[2] == 0)
@@ -2238,7 +2238,7 @@ static void	test_ft_strsplit()
 		else
 		{
 			printf("%s%s%s", RED, "[FAILED] ", NC);
-			add_error("[ERROR] - ft_strsplit : ft_strsplit(\"((((((((((((Hello((((((((((((((((((((((((((World((((((((((((((((((((\", '(')", NULL);
+			printf("\n[ERROR] - ft_strsplit : ft_strsplit(\"((((((((((((Hello((((((((((((((((((((((((((World((((((((((((((((((((\", '(') %s\n", NULL);
 		}
 		exit(EXIT_SUCCESS);
 	}
@@ -2262,7 +2262,7 @@ static void	test_ft_itoa()
 		else
 		{
 			printf("%s%s%s", RED, "[FAILED] ", NC);
-			add_error("[ERROR] - ft_itoa : ft_itoa(123) -> ", ft_itoa(123));
+			printf("\n[ERROR] - ft_itoa : ft_itoa(123) -> %s\n", ft_itoa(123));
 		}
 		exit(EXIT_SUCCESS);
 	}
@@ -2278,7 +2278,7 @@ static void	test_ft_itoa()
 			else
 			{
 				printf("%s%s%s", RED, " [FAILED] ", NC);
-				add_error("[ERROR] - ft_itoa : ft_itoa(2147483647) -> ", ft_itoa(2147483647));
+				printf("\n[ERROR] - ft_itoa : ft_itoa(2147483647) -> %s\n", ft_itoa(2147483647));
 			}
 			exit(EXIT_SUCCESS);
 		}
@@ -2294,7 +2294,7 @@ static void	test_ft_itoa()
 				else
 				{
 					printf("%s%s%s", RED, " [FAILED] ", NC);
-					add_error("[ERROR] - ft_itoa : ft_itoa(-2) -> ", ft_itoa(-2));
+					printf("\n[ERROR] - ft_itoa : ft_itoa(-2) -> %s\n", ft_itoa(-2));
 				}
 				exit(EXIT_SUCCESS);			
 			}
@@ -2310,7 +2310,7 @@ static void	test_ft_itoa()
 					else
 					{
 						printf("%s%s%s", RED, " [FAILED] ", NC);
-						add_error("[ERROR] - ft_itoa : ft_itoa(-2147483648) -> ", ft_itoa(-2147483648));
+						printf("\n[ERROR] - ft_itoa : ft_itoa(-2147483648) -> %s\n", ft_itoa(-2147483648));
 					}
 					exit(EXIT_SUCCESS);	
 				}
@@ -2326,7 +2326,7 @@ static void	test_ft_itoa()
 						else
 						{
 							printf("%s%s%s", RED, " [FAILED] ", NC);
-							add_error("[ERROR] - ft_itoa : ft_itoa(0) -> ", ft_itoa(0));
+							printf("\n[ERROR] - ft_itoa : ft_itoa(0) -> %s\n", ft_itoa(0));
 						}
 						exit(EXIT_SUCCESS);
 					}
@@ -2342,7 +2342,7 @@ static void	test_ft_itoa()
 							else
 							{
 								printf("%s%s%s", RED, " [FAILED] ", NC);
-								add_error("[ERROR] - ft_itoa : ft_itoa(489652) -> ", ft_itoa(489652));
+								printf("\n[ERROR] - ft_itoa : ft_itoa(489652) -> %s\n", ft_itoa(489652));
 							}
 							exit(EXIT_SUCCESS);	
 						}
@@ -2367,7 +2367,7 @@ static void	errors_log()
 	strlcat(header, asctime(&tm), sizeof(header));
 	strlcat(header, "\n\n\n", sizeof(header));
 	remove("errors.log");
-	if ((file_desc = open("errors.log", O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IRGRP | S_IROTH)) < 0)
+	if ((file_desc = open("errors.log", O_WRONLY | O_APPEND | O_CREAT, 777)) < 0)
 		return ;
 	write(file_desc, header, sizeof(header));
 	write(file_desc, ERRORS, sizeof(ERRORS));
@@ -2523,7 +2523,8 @@ int		main(void)
 	test_ft_itoa();
 
 	errors_log();
-	printf("\n\n%sSee detailed information in errors.log%s\n", YELLOW, NC);
+	if (*ERRORS)
+		printf("\n\n%sSee detailed information about segfaults in errors.log%s\n", YELLOW, NC);
 
 	return (0);
 }
