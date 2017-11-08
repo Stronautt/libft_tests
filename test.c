@@ -6,7 +6,7 @@
 /*   By: pgritsen <pgritsen@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/25 18:07:22 by pgritsen          #+#    #+#             */
-/*   Updated: 2017/11/07 19:04:46 by pgritsen         ###   ########.fr       */
+/*   Updated: 2017/11/08 18:19:25 by pgritsen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <signal.h>
 #include <errno.h>
@@ -23,6 +24,10 @@
 /*
 **		Color Library
 */
+
+#define q_ABS(num)(num < 0 ? -num : num)
+
+#define q_INT_MAX_LEN 10
 
 #define MB_SIZE 1048576
 
@@ -115,7 +120,7 @@ static char		*q_itoa(int n)
 		sign = 1;
 	if (n == 0)
 		return (strdup("0"));
-	if ((num = (char *)malloc(INT_MAX_LEN + sign + 1)) == NULL)
+	if ((num = (char *)malloc(q_INT_MAX_LEN + sign + 1)) == NULL)
 		return (NULL);
 	it = 0;
 	if (sign)
@@ -123,7 +128,7 @@ static char		*q_itoa(int n)
 	n_l = n;
 	while (n_l)
 	{
-		num[it++] = ABS(n_l % 10) + '0';
+		num[it++] = q_ABS(n_l % 10) + '0';
 		n_l /= 10;
 	}
 	num[it] = 0;
@@ -388,7 +393,7 @@ static void test_ft_bzero(void *(*func)(void *, size_t))
 			add_error("[CRASH] - ft_bzero :\nchar ft_s1[] = \"Hello World!\";\nft_bzero(ft_s1, 4);", NULL);
 		pid_b = fork();
 		if (pid_b == 0)
-		{
+		{			
 			bzero(s2, 0);
 			func(ft_s2, 0);
 			if (!memcmp(s2, ft_s2, sizeof(s2)))
@@ -2354,6 +2359,20 @@ static void	test_ft_itoa()
 	}
 }
 
+static void	errors_log()
+{
+	int		file_desc;
+	char	header[256] = "LIBFT TEST error log\nDate : ";
+	struct 	tm tm = *localtime(&(time_t){time(NULL)});
+	strlcat(header, asctime(&tm), sizeof(header));
+	strlcat(header, "\n\n\n", sizeof(header));
+	remove("errors.log");
+	if ((file_desc = open("errors.log", O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IRGRP | S_IROTH)) < 0)
+		return ;
+	write(file_desc, header, sizeof(header));
+	write(file_desc, ERRORS, sizeof(ERRORS));
+}
+
 int		main(void)
 {
     printf("%s!TEST!\t--\tft_putstr%s\n", LCYAN, NC);
@@ -2502,6 +2521,9 @@ int		main(void)
 
 	printf("%s%s%s", LCYAN, "\n!TEST!\t--\tft_itoa\n\t", NC);
 	test_ft_itoa();
+
+	errors_log();
+	printf("\n\n%sSee detailed information in errors.log%s\n", YELLOW, NC);
 
 	return (0);
 }
